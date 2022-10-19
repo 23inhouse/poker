@@ -19,7 +19,7 @@ struct RiverView: View {
 
     var body: some View {
         HStack(spacing: 15) {
-            ForEach(Array(cards.enumerated()), id: \.element) { i, card in
+            ForEach(Array(cards.enumerated()), id: \.offset) { i, card in
                 CardView(card: card, faceUp: faceUp(position, index: i))
                     .background {
                         GeometryReader { geo in

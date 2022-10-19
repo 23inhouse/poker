@@ -22,4 +22,27 @@ enum Rank: String {
     case king = "K"
     case ace = "A"
 }
+
 extension Rank: CaseIterable {}
+
+extension Rank: Comparable {
+    static let ranks: [Rank] = [two, three, four, five, six, seven, eight, nine, ten, jack, queen, king, ace]
+
+    static func == (lhs: Rank, rhs: Rank) -> Bool {
+        return lhs.rawValue == rhs.rawValue
+    }
+
+    static func < (lhs: Rank, rhs: Rank) -> Bool {
+        return lhs.index() < rhs.index()
+    }
+
+    func index() -> Int {
+        return Rank.ranks.firstIndex(of: self) ?? -1
+    }
+}
+
+extension Rank: CustomStringConvertible {
+    var description: String {
+        return rawValue
+    }
+}

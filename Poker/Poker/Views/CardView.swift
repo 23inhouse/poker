@@ -12,17 +12,18 @@ struct CardView: View {
     var faceUp: Bool = true
 
     var body: some View {
-        let color: Color = [.club, .spade].contains(card.suit) ? .black : .red
+        let color: Color = [.clubs, .spades].contains(card.suit) ? .black : .red
 
         GeometryReader { geo in
             ZStack {
                 if faceUp {
                     VStack(spacing: 0) {
                         HStack {
-                            Image(systemName: "suit.\(card.suit.rawValue).fill")
+                            Image(systemName: "suit.\(card.suit.description).fill")
                                 .resizable()
                                 .scaledToFit()
                                 .frame(maxHeight: geo.size.width * 0.34)
+                                .frame(width: geo.size.width * 0.34)
                             Spacer()
                         }
                         Spacer()
@@ -57,7 +58,7 @@ struct CardView_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
             HStack {
-                CardView(card: Card(rank: .ten, suit: .spade))
+                CardView(card: Card(rank: .ten, suit: .diamonds))
                 CardView(card: Card())
                 CardView(card: Card(), faceUp: false)
 
