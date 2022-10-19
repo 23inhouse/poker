@@ -25,6 +25,10 @@ struct Hand {
         return true
     }
 
+    init(cards: [Card]) {
+        self.cards = cards
+    }
+
     init?(_ hand: String) {
         for card in hand.split(separator: " ") {
             guard let card = Card(String(card)) else { return nil }
@@ -34,6 +38,7 @@ struct Hand {
         guard validate() else { return nil }
     }
 }
+extension Hand: Hashable {}
 
 extension Hand: Collection {
     typealias Index = Array<Card>.Index

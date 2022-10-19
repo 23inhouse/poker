@@ -16,7 +16,7 @@ struct CardView: View {
 
         GeometryReader { geo in
             ZStack {
-                if faceUp {
+                if true || faceUp {
                     VStack(spacing: 0) {
                         HStack {
                             Image(systemName: "suit.\(card.suit.description).fill")

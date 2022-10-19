@@ -9,13 +9,13 @@ import Foundation
 
 struct Poker {
     static func bestHand(_ hands: [String]) -> String {
-        let Hands: [Hand] = hands.map { handString in
+        let hands: [Hand] = hands.map { handString in
             guard let hand = Hand(handString) else {
                 assert(false, "Error: Invalid hand [\(handString)]")
             }
             return hand
         }
-        guard let best = BestHand.check(Hands) else {
+        guard let best = BestHand.check(hands) else {
             assert(false, "Error: No winner")
         }
         return String(describing: best.hand)
@@ -23,43 +23,68 @@ struct Poker {
 }
 
 struct BestHand {
-    typealias HandLogic = (Hand) -> ([Card])
+    typealias HandLogic = (Hand) -> ([Card], String)
+
+    let hand: Hand
+    let cards: [Card]
+    let score: Int
+    let description: String
+
+    init(_ hand: Hand) {
+        var score = 0
+        var cards = [Card]()
+        var desc = "No hand"
+
+        for (i, logic) in BestHand.logics.enumerated() {
+            (cards, desc) = logic(hand)
+            if cards.count == 5 {
+                score = BestHand.logics.count - i
+                break
+            }
+        }
+
+        self.hand = hand
+        self.cards = cards
+        self.score = score
+        self.description = desc
+    }
 
     static let logics: [HandLogic] = [royalFlush, straightFlush, fourOfAKind, fullHouse, flush, straight, threeOfAKind, twoPair, pair, highCard]
 
     static let royalFlush: HandLogic = { hand in
-        let cards = straightFlush(hand)
-        guard cards.count == 5 else { return [] }
-        guard cards[0].rank == .ace else { return [] }
-        return cards
+        let (cards, desc) = straightFlush(hand)
+        guard cards.count == 5 else { return ([], desc) }
+        guard cards[0].rank == .ace else { return ([], desc) }
+        return (cards, "Royal Flush")
     }
 
     static let straightFlush: HandLogic = { hand in
-        let cards = straight(hand)
-        guard cards.count == 5, flush(hand).count == 5 else { return [] }
-        return cards
+        let (cards, desc) = straight(hand)
+        guard cards.count == 5, flush(hand).0.count == 5 else { return ([], desc) }
+        return (cards, "Straight Flush \(highCard(hand).1)")
     }
 
     static let fourOfAKind: HandLogic = { hand in
         var cards = grouped(hand)
-        guard cards.count == 4 && cards.first!.rank == cards.last!.rank else { return [] }
+        guard cards.count == 4 && cards.first!.rank == cards.last!.rank else { return ([], highCard(hand).1) }
         for card in hand.sorted().filter({ !cards.contains($0) }) {
             cards.append(card)
         }
-        return cards
+        return (cards, "Four of a kind \(cards.first!.rank)s")
     }
 
     static let fullHouse: HandLogic = { hand in
         var cards = grouped(hand)
-        guard cards.count == 5 else { return cards }
+        guard cards.count == 5 else { return ([], highCard(hand).1) }
         if cards[0].rank != cards[2].rank {
             cards.reverse()
         }
-        return cards
+        return (cards, "Full house")
     }
 
     static let flush: HandLogic = { hand in
-        return hand.sorted().filter { card in card.suit == hand.cards[0].suit }
+        let cards = hand.sorted().filter { card in card.suit == hand.cards[0].suit }
+        return (cards, "Flush \(highCard(hand).1)")
     }
 
     static let straight: HandLogic = { hand in
@@ -72,38 +97,39 @@ struct BestHand {
                 cards.insert(card, at: 0)
             }
         }
-        return cards
+        return (cards, "Straight \(highCard(hand).1)")
     }
 
     static let threeOfAKind: HandLogic = { hand in
         var cards = grouped(hand)
-        guard cards.count == 3 else { return [] }
+        guard cards.count == 3 else { return ([], highCard(hand).1) }
         for card in hand.sorted().filter({ !cards.contains($0) }) {
             cards.append(card)
         }
-        return cards
+        return (cards, "Three of a kind \(cards.first!.rank)s")
     }
 
     static let twoPair: HandLogic = { hand in
         var cards = grouped(hand)
-        guard cards.count == 4 && cards.first!.rank != cards.last!.rank else { return [] }
+        guard cards.count == 4 && cards.first!.rank != cards.last!.rank else { return ([], highCard(hand).1) }
         for card in hand.sorted().filter({ !cards.contains($0) }) {
             cards.append(card)
         }
-        return cards
+        return (cards, "Two pair \(cards[0].rank)s & \(cards[3].rank)s")
     }
 
     static let pair: HandLogic = { hand in
         var cards = grouped(hand)
-        guard cards.count == 2 else { return [] }
+        guard cards.count == 2 else { return ([], highCard(hand).1 ) }
         for card in hand.sorted().filter({ !cards.contains($0) }) {
             cards.append(card)
         }
-        return cards
+        return (cards, "Pair of \(cards.first!.rank)s")
     }
 
     static let highCard: HandLogic = { hand in
-        return hand.cards.sorted()
+        let cards = hand.cards.sorted()
+        return (cards, "\(cards.first!.rank.rawValue) high")
     }
 
     static func check(_ hands: [Hand]) -> BestHand? {
@@ -124,28 +150,9 @@ struct BestHand {
         }
         return cards.sorted()
     }
-
-    let hand: Hand
-    let cards: [Card]
-    let score: Int
-
-    init(_ hand: Hand) {
-        var score = 0
-        var cards = [Card]()
-
-        for (i, logic) in BestHand.logics.enumerated() {
-            cards = logic(hand)
-            if cards.count == 5 {
-                score = BestHand.logics.count - i
-                break
-            }
-        }
-
-        self.hand = hand
-        self.cards = cards
-        self.score = score
-    }
 }
+
+extension BestHand: Hashable {}
 
 extension BestHand: Comparable {
     static func == (lhs: BestHand, rhs: BestHand) -> Bool {

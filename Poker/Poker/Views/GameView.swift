@@ -8,16 +8,11 @@
 import SwiftUI
 
 struct GameView: View {
-    let player: Player = Player(cards: [Card(), Card()], bet: Int.random(in: 0..<500))
+    let game: Game = Game.new()
 
-    let players: [Player] = [
-        Player(cards: [Card(), Card()], bet: Int.random(in: 0..<500)),
-        Player(cards: [Card(), Card()], bet: Int.random(in: 0..<500)),
-        Player(cards: [Card(), Card()], bet: Int.random(in: 0..<500)),
-        Player(cards: [Card(), Card()], bet: Int.random(in: 0..<500))
-    ]
-
-    let cards: [Card] = [Card(), Card(), Card(), Card(), Card()]
+    var player: Player { game.player }
+    var players: [Player] { game.players }
+    var river: [Card] { game.river }
 
     @State var cardWidth: CGFloat = 50
 
@@ -26,24 +21,27 @@ struct GameView: View {
     var body: some View {
         VStack {
             ForEach(Array(players), id: \.self) { player in
-                PlayerView(player: player, faceUp: false, cardWidth: cardWidth)
-                    .opacity([1, 0.15].randomElement() ?? 1)
+                PlayerView(game: game, player: player, faceUp: false, cardWidth: cardWidth)
+//                    .opacity([1, 0.15].randomElement() ?? 1)
             }
             Text("Pot: \(pot)€")
                 .font(.title)
-            RiverView(cards: cards, position: .flop, cardWidth: $cardWidth)
+            RiverView(game: game, position: .flop, cardWidth: $cardWidth)
                 .padding(.horizontal)
             HStack {
-                Text("💩")
+                Text("💩      ")
                     .opacity(0.25)
                 Spacer()
                 Text("Bet: \(player.bet)€")
                 Spacer()
                 Text("🌈")
-                    .opacity(0.25)
+                    .onTapGesture {
+                        game.deal()
+                    }
             }
             .font(.title)
-            PlayerView(player: player, faceUp: true, cardWidth: cardWidth)
+            PlayerView(game: game, player: player, faceUp: true, cardWidth: cardWidth)
+                .padding(.horizontal, 10)
         }
     }
 }

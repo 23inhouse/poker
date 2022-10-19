@@ -12,7 +12,8 @@ enum RiverPosition {
 }
 
 struct RiverView: View {
-    let cards: [Card]
+    let game: Game
+    var cards: [Card] { game.river }
     var position: RiverPosition = .preflop
 
     @Binding var cardWidth: CGFloat
@@ -29,6 +30,7 @@ struct RiverView: View {
                                 }
                         }
                     }
+                    .offset(y: (game.bestHand?.hand.cards ?? []).contains(card) ? -5 : 5)
             }
         }
     }
@@ -50,10 +52,10 @@ struct RiverView: View {
 struct RiverView_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
-            RiverView(cards: [Card(), Card(), Card(), Card(), Card()], position: .preflop, cardWidth: .constant(100))
-            RiverView(cards: [Card(), Card(), Card(), Card(), Card()], position: .flop, cardWidth: .constant(100))
-            RiverView(cards: [Card(), Card(), Card(), Card(), Card()], position: .turn, cardWidth: .constant(100))
-            RiverView(cards: [Card(), Card(), Card(), Card(), Card()], position: .river, cardWidth: .constant(100))
+            RiverView(game: Game.new(), position: .preflop, cardWidth: .constant(100))
+            RiverView(game: Game.new(), position: .flop, cardWidth: .constant(100))
+            RiverView(game: Game.new(), position: .turn, cardWidth: .constant(100))
+            RiverView(game: Game.new(), position: .river, cardWidth: .constant(100))
         }
     }
 }

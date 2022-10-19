@@ -10,7 +10,7 @@ import SwiftUI
 struct ContentView: View {
     var body: some View {
         GameView()
-            .padding()
+            .padding(10.000)
     }
 }
 

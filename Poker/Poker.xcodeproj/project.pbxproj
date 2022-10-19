@@ -24,6 +24,7 @@
 		B51AFB31290018E300754F3C /* Suit.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51AFB30290018E300754F3C /* Suit.swift */; };
 		B51AFB3329001B1900754F3C /* Poker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51AFB3229001B1900754F3C /* Poker.swift */; };
 		B51AFB3529001B3500754F3C /* Hand.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51AFB3429001B3500754F3C /* Hand.swift */; };
+		B51AFB3729004DB400754F3C /* Game.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51AFB3629004DB400754F3C /* Game.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,6 +65,7 @@
 		B51AFB30290018E300754F3C /* Suit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Suit.swift; sourceTree = "<group>"; };
 		B51AFB3229001B1900754F3C /* Poker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Poker.swift; sourceTree = "<group>"; };
 		B51AFB3429001B3500754F3C /* Hand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Hand.swift; sourceTree = "<group>"; };
+		B51AFB3629004DB400754F3C /* Game.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Game.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -164,6 +166,7 @@
 			isa = PBXGroup;
 			children = (
 				B51AFB2A2900189D00754F3C /* Card.swift */,
+				B51AFB3629004DB400754F3C /* Game.swift */,
 				B51AFB2C290018B500754F3C /* Player.swift */,
 				B51AFB3229001B1900754F3C /* Poker.swift */,
 				B51AFB3429001B3500754F3C /* Hand.swift */,
@@ -306,6 +309,7 @@
 				B51AFAF928FF3CD400754F3C /* ContentView.swift in Sources */,
 				B51AFB2128FF502600754F3C /* CardView.swift in Sources */,
 				B51AFB3529001B3500754F3C /* Hand.swift in Sources */,
+				B51AFB3729004DB400754F3C /* Game.swift in Sources */,
 				B51AFB2B2900189D00754F3C /* Card.swift in Sources */,
 				B51AFB2528FF81C600754F3C /* RiverView.swift in Sources */,
 				B51AFB2D290018B500754F3C /* Player.swift in Sources */,

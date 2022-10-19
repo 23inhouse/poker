@@ -175,6 +175,16 @@ final class PokerTests: XCTestCase {
                 best:  "2♢ 8♡ 8♢ 2♡ 8♧"
             ),
             (
+                name: "full house (low card) beats lower",
+                hands: [
+                    "4♤ 3♤ 8♤ J♤ K♤",
+                    "4♢ 8♡ 8♢ 4♡ 4♧",
+                    "Q♡ K♡ J♢ 10♧ 9♡",
+                    "3♡ A♡ 3♢ 3♧ A♧"
+                ],
+                best:  "4♢ 8♡ 8♢ 4♡ 4♧"
+            ),
+            (
                 name: "best full house",
                 hands: [
                     "4♤ 3♤ 8♤ J♤ K♤",
