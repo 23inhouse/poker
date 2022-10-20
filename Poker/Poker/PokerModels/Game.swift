@@ -8,23 +8,24 @@
 import Foundation
 
 class Game {
-    static func deck() -> [Card] {
+    static var deck: [Card] = {
         var deck: [Card] = []
         for suit in Suit.allCases {
             for rank in Rank.allCases {
                 deck.append(Card(rank: rank, suit: suit))
             }
         }
-        return deck.shuffled()
-    }
+        return deck
+    }()
 
     static func new() -> Game {
         let game = Game()
+        game.deck = Game.deck.shuffled().shuffled().shuffled()
         game.deal()
         return game
     }
 
-    var deck: [Card] = Game.deck()
+    var deck: [Card] = Game.deck
 
     var player: Player = Player(cards: [])
     var players: [Player] = []
@@ -39,7 +40,8 @@ class Game {
     }
 
     func dealCard() -> Card {
-        self.deck.popLast() ?? Card(rank: .ace, suit: .spades)
+        _ = self.deck.popLast()
+        return self.deck.popLast() ?? Card(rank: .ace, suit: .spades)
     }
 
     func dealPlayer() -> Player {
@@ -56,6 +58,13 @@ class Game {
     }
 
     func dealRiver() -> [Card] {
+//        var cards: [Card] = []
+//        for _ in 0..<5 {
+//            _ = dealCard()
+//            cards.append(dealCard())
+//
+//        }
+//        return cards
         [dealCard(), dealCard(), dealCard(), dealCard(), dealCard()]
     }
 

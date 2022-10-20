@@ -156,7 +156,12 @@ extension BestHand: Hashable {}
 
 extension BestHand: Comparable {
     static func == (lhs: BestHand, rhs: BestHand) -> Bool {
-        return lhs.score == rhs.score && lhs.highCard() == rhs.highCard()
+        guard lhs.score == rhs.score else { return false }
+        if [8, 4, 3, 2, 1].contains(lhs.score) { // fourOfAKind, threeOfAKind, twoPair, pair, highCard
+            return lhs.score == rhs.score && lhs.highCard() == rhs.highCard() && lhs.kicker() == rhs.kicker()
+        } else {
+            return lhs.score == rhs.score && lhs.highCard() == rhs.highCard()
+        }
     }
 
     static func < (lhs: BestHand, rhs: BestHand) -> Bool {
@@ -175,6 +180,11 @@ extension BestHand: Comparable {
 
     func highCard() -> Rank {
         return cards[0].rank
+    }
+
+    func kicker() -> Rank? {
+        let hand = BestHand.grouped(hand)
+        return cards.first(where: { card in !hand.contains(card) })?.rank
     }
 
     func secondHighCard(_ other: BestHand) -> Rank {

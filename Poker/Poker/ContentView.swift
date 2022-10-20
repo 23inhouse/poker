@@ -11,6 +11,7 @@ struct ContentView: View {
     var body: some View {
         GameView()
             .padding(10.000)
+            .preferredColorScheme(.light)
     }
 }
 

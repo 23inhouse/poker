@@ -21,7 +21,9 @@ struct RiverView: View {
     var body: some View {
         HStack(spacing: 15) {
             ForEach(Array(cards.enumerated()), id: \.offset) { i, card in
-                CardView(card: card, faceUp: faceUp(position, index: i))
+                let inBestHand = (game.bestHand?.hand.cards ?? []).contains(card)
+                CardView(card: card, faceUp: .constant(faceUp(position, index: i)))
+                    .opacity(inBestHand ? 1 : 0.5)
                     .background {
                         GeometryReader { geo in
                             Color.clear
@@ -30,7 +32,8 @@ struct RiverView: View {
                                 }
                         }
                     }
-                    .offset(y: (game.bestHand?.hand.cards ?? []).contains(card) ? -5 : 5)
+                    .offset(y: position == .river && inBestHand ? -5 : 5)
+                    .opacity(inBestHand ? 1 : 0.5)
             }
         }
     }

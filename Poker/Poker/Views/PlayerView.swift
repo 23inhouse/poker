@@ -10,31 +10,51 @@ import SwiftUI
 struct PlayerView: View {
     let game: Game
     let player: Player
-    let faceUp: Bool
+    @Binding var isFaceUp: Bool
     let cardWidth: CGFloat
+
+    var isInBestHand: Bool {
+        player.bestHand == game.bestHand
+    }
 
     var body: some View {
         HStack {
             ForEach(Array(player.cards.enumerated()), id: \.offset) { index, card in
-                CardView(card: card, faceUp: faceUp)
+                CardView(card: card, faceUp: $isFaceUp)
                     .frame(maxWidth: cardWidth)
             }
-            Circle().fill(.secondary)
-                .frame(maxWidth: cardWidth * 0.4)
-            if player.bestHand == game.bestHand {
-                Circle().fill(.green)
-                    .frame(maxWidth: cardWidth * 0.4)
-            }
-            Spacer()
             VStack {
-                Text("B: \(player.bet)€")
-                    .font(.title)
-                Text("C: \(player.chips)€")
-                    .font(.title)
-                Text("\(player.bestHand(from: game.river)?.description ?? "")")
+                Circle().fill(.secondary)
+                    .frame(maxWidth: cardWidth * 0.4)
+                if isInBestHand {
+                    Circle().fill(.green)
+                        .frame(maxWidth: cardWidth * 0.4)
+                }
             }
-//            .font(.title)
+            VStack(alignment: .leading) {
+                HStack {
+                    VStack(alignment: .trailing) {
+                        Text("BET")
+                        Text("\(player.bet)€")
+                    }
+                    .frame(maxWidth: .infinity)
+                    .font(.title3)
+                    VStack(alignment: .trailing) {
+                        Text("CHIPS")
+                        Text("\(player.chips)€")
+                    }
+                    .frame(maxWidth: .infinity)
+                    .font(.title3)
+
+                }
+                Text("\(player.bestHand(from: game.river)?.description ?? "")")
+                    .opacity(isInBestHand ? 1 : 0)
+            }
+            .frame(maxWidth: .infinity)
+            .font(.body)
         }
+        .frame(maxWidth: .infinity)
+        .opacity(isInBestHand ? 1 : 0.25)
     }
 }
 
@@ -45,8 +65,11 @@ struct PlayerView_Previews: PreviewProvider {
 
     static var previews: some View {
         VStack {
-            PlayerView(game: game, player: player1, faceUp: false, cardWidth: 50)
-            PlayerView(game: game, player: player2, faceUp: true, cardWidth: 50)
+            PlayerView(game: game, player: player1, isFaceUp: .constant(false), cardWidth: 50)
+            ForEach(game.players, id: \.self) { player in
+                PlayerView(game: game, player: player, isFaceUp: .constant(true), cardWidth: 50)
+            }
+            PlayerView(game: game, player: player2, isFaceUp: .constant(false), cardWidth: 50)
         }
     }
 }

@@ -8,39 +8,47 @@
 import SwiftUI
 
 struct GameView: View {
-    let game: Game = Game.new()
-
     var player: Player { game.player }
     var players: [Player] { game.players }
     var river: [Card] { game.river }
 
+    @State var game: Game = Game.new()
     @State var cardWidth: CGFloat = 50
+    @State var isFaceUp: Bool = false
 
     var pot: Int { players.map(\.bet).reduce(0, +) + player.bet }
 
     var body: some View {
         VStack {
             ForEach(Array(players), id: \.self) { player in
-                PlayerView(game: game, player: player, faceUp: false, cardWidth: cardWidth)
-//                    .opacity([1, 0.15].randomElement() ?? 1)
+                PlayerView(game: game, player: player, isFaceUp: $isFaceUp, cardWidth: cardWidth)
             }
-            Text("Pot: \(pot)€")
-                .font(.title)
-            RiverView(game: game, position: .flop, cardWidth: $cardWidth)
-                .padding(.horizontal)
             HStack {
-                Text("💩      ")
-                    .opacity(0.25)
+                Text("💩")
+                    .font(.largeTitle)
+                    .onTapGesture {
+                        isFaceUp.toggle()
+                    }
                 Spacer()
-                Text("Bet: \(player.bet)€")
+                Text("Pot: \(pot)€")
                 Spacer()
                 Text("🌈")
+                    .font(.largeTitle)
                     .onTapGesture {
-                        game.deal()
+                        game = Game.new()
                     }
             }
+            .font(.largeTitle)
             .font(.title)
-            PlayerView(game: game, player: player, faceUp: true, cardWidth: cardWidth)
+            RiverView(game: game, position: .river, cardWidth: $cardWidth)
+                .padding(.horizontal)
+            HStack {
+                Text("FOLD")
+                Text("CHECK")
+                Text("Bet: \(player.bet)€")
+            }
+            .font(.title)
+            PlayerView(game: game, player: player, isFaceUp: .constant(true), cardWidth: cardWidth)
                 .padding(.horizontal, 10)
         }
     }
