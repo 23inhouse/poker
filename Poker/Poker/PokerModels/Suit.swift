@@ -15,6 +15,7 @@ enum Suit: String {
 }
 
 extension Suit: CaseIterable {}
+extension Suit: Hashable {}
 
 extension Suit: Comparable {
     static let order: [Suit] = [clubs, diamonds, hearts, spades]

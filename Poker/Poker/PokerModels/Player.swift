@@ -8,16 +8,23 @@
 import Foundation
 
 struct Player {
-    let cards: [Card]
+    var cards: [Card] = []
     var bet: Int = 0
     var chips: Int = 500
     var bestHand: BestHand?
+    var isFolded: Bool = false
 
     func bestHand(from river: [Card]) -> BestHand? {
-        let hands: [Hand] = river.riverHands(with: cards).map { possibleHands in
-            return Hand(cards: possibleHands)
-        }
-        return BestHand.check(hands)
+        print("Player.bestHand")
+        let fullHand = cards + river
+        guard !fullHand.isEmpty else { return nil }
+        let riveHand = Hand(cards: fullHand)
+        guard let bestCards = BestHand.check([riveHand])?.cards else { return nil }
+        return BestHand(Hand(cards: Array(bestCards.prefix(5))))
+    }
+
+    mutating func fold() {
+        isFolded = true
     }
 }
 extension Player: Hashable {}

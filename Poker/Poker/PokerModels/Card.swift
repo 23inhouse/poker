@@ -25,8 +25,14 @@ struct Card {
         let rankFrom = Array(from)[rankRange].map({ String($0) }).joined()
         let suitFrom = String(from.last!)
 
-        guard let rank = Rank(rawValue: rankFrom) else { return nil }
-        guard let suit = Suit(rawValue: suitFrom) else { return nil }
+        guard let rank = Rank(rawValue: rankFrom) else {
+            assert(false, "Error: Invalid rank [\(from)]")
+            return nil
+        }
+        guard let suit = Suit(rawValue: suitFrom) else {
+            assert(false, "Error: Invalid suit [\(from)]")
+            return nil
+        }
 
         self.rank = rank
         self.suit = suit

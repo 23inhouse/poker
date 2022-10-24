@@ -33,10 +33,10 @@ extension Rank: Comparable {
     }
 
     static func < (lhs: Rank, rhs: Rank) -> Bool {
-        return lhs.index() < rhs.index()
+        return lhs.index < rhs.index
     }
 
-    func index() -> Int {
+    var index: Int {
         return Rank.ranks.firstIndex(of: self) ?? -1
     }
 }

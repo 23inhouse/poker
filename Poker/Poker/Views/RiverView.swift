@@ -8,37 +8,43 @@
 import SwiftUI
 
 enum RiverPosition {
-    case preflop, flop, turn, river
+    case preflop, flop, turn, river, over
 }
 
 struct RiverView: View {
-    let game: Game
-    var cards: [Card] { game.river }
-    var position: RiverPosition = .preflop
+    @EnvironmentObject var game: Game
 
-    @Binding var cardWidth: CGFloat
+    static let numberOfCards: Int = 5
 
     var body: some View {
         HStack(spacing: 15) {
-            ForEach(Array(cards.enumerated()), id: \.offset) { i, card in
-                let inBestHand = (game.bestHand?.hand.cards ?? []).contains(card)
-                CardView(card: card, faceUp: .constant(faceUp(position, index: i)))
-                    .opacity(inBestHand ? 1 : 0.5)
-                    .background {
-                        GeometryReader { geo in
-                            Color.clear
-                                .onAppear {
-                                    cardWidth = geo.size.width
-                                }
-                        }
-                    }
-                    .offset(y: position == .river && inBestHand ? -5 : 5)
-                    .opacity(inBestHand ? 1 : 0.5)
+            ForEach(Array(0..<RiverView.numberOfCards), id: \.self) { index in
+                RiverCardView(index: index)
             }
         }
     }
+}
 
-    func faceUp(_ position: RiverPosition, index: Int) -> Bool {
+struct RiverCardView: View {
+    @EnvironmentObject var game: Game
+
+    let index: Int
+
+    var position: RiverPosition { game.riverPosition }
+    var cards: [Card] { game.river }
+
+    var card: Card? {
+        guard cards.count > index else { return nil }
+        return cards[index]
+    }
+
+    var isInBestHand: Bool {
+        guard let card = card else { return false }
+        guard game.over else { return true }
+        return (game.bestHand?.cards ?? []).contains(card)
+    }
+
+    var isFaceUp: Bool {
         switch position {
         case .preflop:
             return false
@@ -48,17 +54,36 @@ struct RiverView: View {
             return index < 4
         case .river:
             return true
+        case .over:
+            return true
         }
+    }
+
+    var body: some View {
+        CardView(card: card, isFaceUp: isFaceUp, isInBestHand: isInBestHand)
     }
 }
 
 struct RiverView_Previews: PreviewProvider {
+    static func game(_ position: RiverPosition) -> Game {
+        let game = Game()
+        game.deal()
+        game.river = [game.dealCard(), game.dealCard(), game.dealCard(), game.dealCard(), game.dealCard()]
+        game.riverPosition = position
+        return game
+    }
     static var previews: some View {
         VStack {
-            RiverView(game: Game.new(), position: .preflop, cardWidth: .constant(100))
-            RiverView(game: Game.new(), position: .flop, cardWidth: .constant(100))
-            RiverView(game: Game.new(), position: .turn, cardWidth: .constant(100))
-            RiverView(game: Game.new(), position: .river, cardWidth: .constant(100))
+            RiverView()
+                .environmentObject(game(.preflop))
+            RiverView()
+                .environmentObject(game(.flop))
+            RiverView()
+                .environmentObject(game(.turn))
+            RiverView()
+                .environmentObject(game(.river))
+            RiverView()
+                .environmentObject(game(.over))
         }
     }
 }
