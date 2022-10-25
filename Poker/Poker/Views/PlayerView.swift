@@ -21,6 +21,10 @@ struct PlayerView: View {
         player.cards
     }
 
+    var bestHandDescription: String {
+        player.bestHand(from: game.river)?.label ?? "Player's hand"
+    }
+
     var isInBestHand: Bool {
         guard !player.isFolded else { return false }
         guard game.over else { return true }
@@ -78,8 +82,9 @@ struct PlayerView: View {
                     .frame(maxWidth: .infinity)
                     .font(.body)
                 }
-                Text("\(player.bestHand(from: game.river)?.label ?? "What is it?")")
+                Text("\(bestHandDescription)")
                     .opacity(isShowHand ? 1 : 0)
+                    .animation(bestHandDescription == "Player's hand" ? .none : .linear(duration: 0.125), value: isShowHand)
                 Spacer()
 
             }
