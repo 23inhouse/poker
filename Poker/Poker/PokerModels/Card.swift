@@ -26,11 +26,11 @@ struct Card {
         let suitFrom = String(from.last!)
 
         guard let rank = Rank(rawValue: rankFrom) else {
-            assert(false, "Error: Invalid rank [\(from)]")
+//            assert(false, "Error: Invalid rank [\(from)]")
             return nil
         }
         guard let suit = Suit(rawValue: suitFrom) else {
-            assert(false, "Error: Invalid suit [\(from)]")
+//            assert(false, "Error: Invalid suit [\(from)]")
             return nil
         }
 

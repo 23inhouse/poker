@@ -66,15 +66,13 @@ struct Hand {
     }
 
     func groupedByStraights() -> [Card] {
-        var sortedCards = self.cards.sorted()
+        var sortedCards: [Card] = cards.sorted().reversed()
 
-        let indexOfAce = sortedCards.firstIndex(where: { card in card.rank == .ace })
+        let indexOfAce = sortedCards.firstIndex { card in card.rank == .ace }
 
         while sortedCards.count >= Hand.numberOfCards {
-            let hand = sortedCards.prefix(Hand.numberOfCards)
-
             var cards: [Card] = []
-            for card in hand.reversed() {
+            for card in sortedCards {
                 if cards.isEmpty || cards.last!.rank.index == card.rank.index - 1 {
                     cards.append(card)
                 }

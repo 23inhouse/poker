@@ -15,7 +15,6 @@ struct Player {
     var isFolded: Bool = false
 
     func bestHand(from river: [Card]) -> BestHand? {
-        print("Player.bestHand")
         let fullHand = cards + river
         guard !fullHand.isEmpty else { return nil }
         let riveHand = Hand(cards: fullHand)
