@@ -8,34 +8,20 @@
 import Foundation
 
 struct Card {
-    var rank: Rank = .allCases.randomElement() ?? .ace
-    var suit: Suit = .allCases.randomElement() ?? .spades
+    var rank: Rank = .random()
+    var suit: Suit = .random()
 
-    init() {}
+    static func from(_ description: String) -> Card? {
+        guard description.count > 1 else { return nil }
 
-    init(rank: Rank, suit: Suit) {
-        self.rank = rank
-        self.suit = suit
-    }
+        var description = description
+        let suitDescription = String(description.removeLast())
+        let rankDescription = description
 
-    init?(_ from: String) {
-        guard from.count > 1 else { return nil }
+        guard let rank = Rank(rawValue: rankDescription) else { return nil }
+        guard let suit = Suit(rawValue: suitDescription) else { return nil }
 
-        let rankRange = 0 ..< Array(from).count - 1
-        let rankFrom = Array(from)[rankRange].map({ String($0) }).joined()
-        let suitFrom = String(from.last!)
-
-        guard let rank = Rank(rawValue: rankFrom) else {
-//            assert(false, "Error: Invalid rank [\(from)]")
-            return nil
-        }
-        guard let suit = Suit(rawValue: suitFrom) else {
-//            assert(false, "Error: Invalid suit [\(from)]")
-            return nil
-        }
-
-        self.rank = rank
-        self.suit = suit
+        return Card(rank: rank, suit: suit)
     }
 }
 
@@ -43,10 +29,17 @@ extension Card: Hashable {}
 
 extension Card: Comparable {
     static func == (lhs: Card, rhs: Card) -> Bool {
-      return lhs.rank == rhs.rank && lhs.suit == rhs.suit
+        return lhs.rank == rhs.rank && lhs.suit == rhs.suit
     }
 
     static func < (lhs: Card, rhs: Card) -> Bool {
-      return lhs.rank > rhs.rank || (lhs.rank == rhs.rank && lhs.suit > rhs.suit)
+        guard lhs.rank != rhs.rank else { return lhs.suit < rhs.suit }
+        return lhs.rank < rhs.rank
+    }
+}
+
+extension Card: CustomStringConvertible {
+    var description: String {
+        return "\(rank.rawValue)\(suit.rawValue)"
     }
 }

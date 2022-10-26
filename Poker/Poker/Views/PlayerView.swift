@@ -22,29 +22,42 @@ struct PlayerView: View {
     }
 
     var bestHandDescription: String {
-        player.bestHand(from: game.river)?.label ?? "Player's hand"
+        guard let bestHand = player.bestHand else { return PlayerView.noDescription }
+        return bestHand.description
+    }
+    static var noDescription: String = "No cards"
+
+    var isShowDescription: Bool {
+        isShowHand && player.bestHand != nil
     }
 
     var isInBestHand: Bool {
         guard !player.isFolded else { return false }
         guard game.over else { return true }
-        return player.bestHand == game.bestHand
+
+        return isWinningHand
     }
 
     var isShowHand: Bool {
+        if game.isPoopMode { return true }
         if isFaceUp { return true }
 
         guard !isFolded else { return false }
         guard game.over else { return isFaceUp }
 
-        return player.bestHand == game.bestHand
+        return isWinningHand
+    }
+
+    var isWinningHand: Bool {
+        guard let playerBestHand = player.bestHand else { return false }
+        return game.winningHands.contains(playerBestHand)
     }
 
     var body: some View {
         HStack {
             ForEach(Array(0..<PlayerView.numberOfCards), id: \.self) { index in
                 let card: Card? = cards.count > index ? cards[index] : nil
-                PlayerCardView(player: player, card: card, isFaceUp: isShowHand)
+                PlayerCardView(player: player, card: card, isFaceUp: isShowHand, isWinningHand: isWinningHand)
             }
             .gesture(
                 DragGesture(minimumDistance: 100)
@@ -83,8 +96,8 @@ struct PlayerView: View {
                     .font(.body)
                 }
                 Text("\(bestHandDescription)")
-                    .opacity(isShowHand ? 1 : 0)
-                    .animation(bestHandDescription == "Player's hand" ? .none : .linear(duration: 0.125), value: isShowHand)
+                    .opacity(isShowDescription ? 1 : 0)
+                    .animation(!isShowDescription ? .none : .linear(duration: 0.125), value: isShowHand)
                 Spacer()
 
             }
@@ -104,12 +117,12 @@ struct PlayerCardView: View {
     let player: Player
     let card: Card?
     let isFaceUp: Bool
+    let isWinningHand: Bool
 
     var isCardInBestHand: Bool {
-        guard player.bestHand == game.bestHand else { return false }
+        guard isWinningHand else { return false }
         guard let card = card else { return false }
-        let cards = player.bestHand(from: game.river)?.cards ?? []
-        return cards.contains(card)
+        return game.winningCards.contains(card)
     }
 
     var body: some View {
@@ -130,8 +143,8 @@ struct PlayerView_Previews: PreviewProvider {
     static var previews: some View {
         VStack {
             HStack {
-                PlayerCardView(player: player1, card: nil, isFaceUp: false)
-                PlayerCardView(player: player1, card: Card(), isFaceUp: true)
+                PlayerCardView(player: player1, card: nil, isFaceUp: false, isWinningHand: false)
+                PlayerCardView(player: player1, card: Card(), isFaceUp: true, isWinningHand: false)
             }
             Divider()
             PlayerView(player: player1, isFaceUp: false)

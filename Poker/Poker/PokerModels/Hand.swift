@@ -8,38 +8,21 @@
 import Foundation
 
 struct Hand {
-    static let numberOfCards = 5
+    static let maxNumberOfCards = 5
 
     var cards: [Card] = []
 
-    init(cards: [Card]) {
-        self.cards = cards
-    }
-
-    init?(_ hand: String) {
-        for card in hand.split(separator: " ") {
-            guard let card = Card(String(card)) else { return nil }
-            self.cards.append(card)
+    static func from(_ description: String) -> Hand? {
+        var cards: [Card] = []
+        for cardDescription in description.split(separator: " ") {
+            guard let card = Card.from(String(cardDescription)) else { return nil }
+            cards.append(card)
         }
-
-//        guard validate() else { return nil }
-    }
-
-    func ranks() -> [Rank] {
-        return cards.map({ $0.rank }).sorted()
-    }
-
-    func suits() -> [Suit] {
-        return cards.map({ $0.suit }).sorted()
-    }
-
-    private func validate() -> Bool {
-        guard cards.count <= Hand.numberOfCards else { return false }
-        return true
+        return Hand(cards: cards)
     }
 
     func groupedByRank() -> [Card] {
-        let hand = self.cards.sorted()
+        let hand = Array(cards.sorted().reversed())
         var cards: [Card] = []
         for card in hand {
             for other in hand {
@@ -51,14 +34,18 @@ struct Hand {
                 }
             }
         }
-        return cards.sorted()
+        if Set(cards.map(\.rank)).count > 2 {
+            cards = Hand(cards: Array(cards.prefix(Hand.maxNumberOfCards))).groupedByRank()
+        }
+
+        return Array(cards)
     }
 
     func groupedBySuit() -> [Card] {
-        let suitedCards: [Suit: [Card]] = Dictionary(grouping: self.cards.sorted(), by: \.suit)
+        let suitedCards: [Suit: [Card]] = Dictionary(grouping: cards.sorted().reversed(), by: \.suit)
         for cardsBySuit in suitedCards {
-            if cardsBySuit.value.count == 5 {
-                return cardsBySuit.value
+            if cardsBySuit.value.count >= Hand.maxNumberOfCards {
+                return Array(cardsBySuit.value.prefix(Hand.maxNumberOfCards))
             }
         }
 
@@ -68,26 +55,28 @@ struct Hand {
     func groupedByStraights() -> [Card] {
         var sortedCards: [Card] = cards.sorted().reversed()
 
-        let indexOfAce = sortedCards.firstIndex { card in card.rank == .ace }
+        if let indexOfAce = sortedCards.firstIndex(where: { card in card.rank == .ace }) {
+            sortedCards.append(sortedCards[indexOfAce])
+        }
 
-        while sortedCards.count >= Hand.numberOfCards {
-            var cards: [Card] = []
+        while sortedCards.count >= Hand.maxNumberOfCards {
+            let firstSortedCard = sortedCards.removeFirst()
+            var cards: [Card] = [firstSortedCard]
+
             for card in sortedCards {
-                if cards.isEmpty || cards.last!.rank.index == card.rank.index - 1 {
+                let cardIndex = card.rank.index
+                let lastCardIndex = cards.last!.rank.index
+                if cardIndex == lastCardIndex - 1 {
                     cards.append(card)
                 }
-                guard let indexOfAce = indexOfAce else { continue }
-
-                if cards.count == 4 && cards.last!.rank == .five {
-                    cards.insert(sortedCards[indexOfAce], at: 0)
+                if cards.count == 4 && cards.first!.rank == .five && sortedCards.last!.rank == .ace {
+                    cards.append(sortedCards.last!)
                 }
             }
 
-            if cards.count == Hand.numberOfCards {
+            if cards.count == Hand.maxNumberOfCards {
                 return cards
             }
-
-            sortedCards.removeFirst()
         }
 
         return []
@@ -113,6 +102,6 @@ extension Hand: Collection {
 
 extension Hand: CustomStringConvertible {
     var description: String {
-        return self.map({ "\($0.rank.rawValue)\($0.suit.rawValue)" }).joined(separator: " ")
+        return map(\.description).joined(separator: " ")
     }
 }

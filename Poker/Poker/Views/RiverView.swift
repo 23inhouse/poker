@@ -40,8 +40,7 @@ struct RiverCardView: View {
 
     var isInBestHand: Bool {
         guard let card = card else { return false }
-        guard game.over else { return true }
-        return (game.bestHand?.cards ?? []).contains(card)
+        return game.winningCards.contains(card)
     }
 
     var isFaceUp: Bool {

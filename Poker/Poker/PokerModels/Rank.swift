@@ -21,6 +21,10 @@ enum Rank: String {
     case queen = "Q"
     case king = "K"
     case ace = "A"
+
+    static func random() -> Rank {
+        allCases.randomElement() ?? .ace
+    }
 }
 
 extension Rank: CaseIterable {}

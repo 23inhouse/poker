@@ -9,7 +9,6 @@ import SwiftUI
 
 struct GameView: View {
     @EnvironmentObject var game: Game
-    @State var isFaceUp: Bool = false
 
     @State var isFolded: Bool = false
     @State var isChecked: Bool = false
@@ -25,7 +24,7 @@ struct GameView: View {
         VStack(spacing: 10) {
             VStack {
                 ForEach(Array(players.enumerated()), id: \.offset) { _, player in
-                    PlayerView(player: player, isFaceUp: isFaceUp)
+                    PlayerView(player: player, isFaceUp: false)
                 }
             }
             Spacer()
@@ -44,19 +43,12 @@ struct GameView: View {
                         .containerShape(Rectangle())
                         .font(.largeTitle)
                         .onTapGesture {
-                            isFaceUp.toggle()
+                            game.isPoopMode.toggle()
                         }
                 }
                 Spacer()
                 VStack {
                     Text("Pot: \(pot)€")
-                        .onTapGesture {
-                            if game.player.cards.isEmpty {
-                                game.deal()
-                            } else {
-                                game.new()
-                            }
-                        }
                     HStack {
                         if isFolded {
                             Text("FOLD")
@@ -87,7 +79,7 @@ struct GameView: View {
                         .containerShape(Rectangle())
                         .font(.largeTitle)
                         .onTapGesture {
-                            isFaceUp.toggle()
+                            game.isPoopMode.toggle()
                         }
                 }
             }

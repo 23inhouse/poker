@@ -15,11 +15,10 @@ struct Player {
     var isFolded: Bool = false
 
     func bestHand(from river: [Card]) -> BestHand? {
-        let fullHand = cards + river
-        guard !fullHand.isEmpty else { return nil }
-        let riveHand = Hand(cards: fullHand)
-        guard let bestCards = BestHand.check([riveHand])?.cards else { return nil }
-        return BestHand(Hand(cards: Array(bestCards.prefix(5))))
+        let allCards = cards + river
+        guard !allCards.isEmpty else { return nil }
+        let handFromAllCards = Hand(cards: allCards)
+        return BestHand.check([handFromAllCards])
     }
 
     mutating func fold() {

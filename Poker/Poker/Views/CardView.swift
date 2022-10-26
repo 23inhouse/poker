@@ -42,12 +42,12 @@ struct CardFaceUpView: View {
     var position: RiverPosition { game.riverPosition }
 
     var opacity: CGFloat {
-        guard position == .over else { return 1 }
+        guard position == .over || game.isPoopMode else { return 1 }
         return isInBestHand ? 1 : 0.25
     }
 
     var offset: CGFloat {
-        guard position == .over else { return 0 }
+        guard position == .over || game.isPoopMode else { return 0 }
         return isInBestHand ? -5 : 5
     }
     var body: some View {

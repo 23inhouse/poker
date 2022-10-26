@@ -23,19 +23,22 @@ class Game: ObservableObject {
     @Published var player: Player = Player()
     @Published var players: [Player] = [Player(), Player(), Player(), Player()]
     @Published var river: [Card] = []
-    @Published var bestHand: BestHand?
+    @Published var winningHands: [BestHand] = []
     @Published var riverPosition: RiverPosition = .preflop
+    @Published var isPoopMode: Bool = false
 
     var over: Bool { riverPosition == .over }
     var isFolded: Bool { player.isFolded }
+    var winningCards: [Card] { winningHands.flatMap(\.handWithKicker) }
 
     func start() {
         print("Came.start")
         deal()
+        calcBestHands()
     }
 
     func new() {
-        self.bestHand = nil
+        self.winningHands = []
         self.river = []
 
         self.player.cards = []
@@ -51,58 +54,19 @@ class Game: ObservableObject {
         self.riverPosition = .preflop
     }
 
-    func deal() {
+    func deal(deck: [Card] = []) {
         print("deal")
-        shuffle()
+        if deck.isEmpty {
+            shuffle()
+        } else {
+            self.deck = deck
+        }
         self.players = dealPlayers()
         self.player = dealPlayer()
         self.river = []
         self.riverPosition = .preflop
     }
 
-    func next() {
-        print("game.next")
-        let cardTurnDelay: Double = 0.125
-        guard !isFolded else {
-            print("isFolded")
-            riverPosition = .over
-            DispatchQueue.main.asyncAfter(deadline: .now() + cardTurnDelay) {
-                self.calcBestHand()
-            }
-            player.isFolded = false
-            return
-        }
-
-        switch riverPosition {
-        case .preflop:
-            dealRiver()
-            DispatchQueue.main.asyncAfter(deadline: .now() + cardTurnDelay) {
-                self.riverPosition = .flop
-            }
-        case .flop:
-            dealRiver()
-            DispatchQueue.main.asyncAfter(deadline: .now() + cardTurnDelay) {
-                self.riverPosition = .turn
-            }
-        case .turn:
-            dealRiver()
-            DispatchQueue.main.asyncAfter(deadline: .now() + cardTurnDelay) {
-                self.riverPosition = .river
-                self.calcBestHand()
-            }
-        case .river:
-            riverPosition = .over
-        case .over:
-            print("over")
-            new()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                self.deal()
-//                isFolded = false
-//                isChecked = false
-//                isBet = false
-            }
-        }
-    }
 
     func shuffle() {
         deck = Game.deck.shuffled().shuffled().shuffled()
@@ -134,21 +98,87 @@ class Game: ObservableObject {
         }
     }
 
-    func calcBestHand() {
+    func next() {
+//        print("game.next")
+        let cardTurnDelay: Double = 0.125
+//        guard !isFolded else {
+//            print("isFolded")
+//            riverPosition = .over
+//            DispatchQueue.main.asyncAfter(deadline: .now() + cardTurnDelay) {
+//                self.calcBestHand()
+//            }
+//            player.isFolded = false
+//            return
+//        }
+
+        switch riverPosition {
+        case .preflop:
+            dealRiver()
+            DispatchQueue.main.asyncAfter(deadline: .now() + cardTurnDelay) {
+                self.riverPosition = .flop
+                self.calcBestHands()
+            }
+        case .flop:
+            dealRiver()
+            DispatchQueue.main.asyncAfter(deadline: .now() + cardTurnDelay) {
+                self.riverPosition = .turn
+                self.calcBestHands()
+            }
+        case .turn:
+            dealRiver()
+            DispatchQueue.main.asyncAfter(deadline: .now() + cardTurnDelay) {
+                self.riverPosition = .river
+                self.calcBestHands()
+            }
+        case .river:
+            riverPosition = .over
+            calcBestHands()
+        case .over:
+            print("over")
+            new()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                self.deal()
+                self.calcBestHands()
+//                isFolded = false
+//                isChecked = false
+//                isBet = false
+            }
+        }
+    }
+
+    func calcBestHands() {
         print("Game.calcBestHand")
         let players: [Player] = players + [player]
 
-        let hands: [Hand] = players.enumerated().compactMap { index, player in
-            let playerBestHand = player.bestHand(from: river)
+        let playerBestHands = Poker.calcBestHands(from: players, river: river)
+
+        for (index, playerBestHand) in playerBestHands.enumerated() {
+//            print("index:", index, "bestHand:", playerBestHand, playerBestHand.hand!, playerBestHand.cards)
             if index < self.players.count {
                 self.players[index].bestHand = playerBestHand
             } else {
                 self.player.bestHand = playerBestHand
             }
-
-            return playerBestHand?.hand
         }
 
-        self.bestHand = BestHand.check(hands)
+        guard riverPosition == .over || isPoopMode else { return }
+
+        self.winningHands = Poker.calcWinningHands(from: playerBestHands)
+        let bestKickerHands = Poker.calcBestHandWithKicker(from: playerBestHands, winningHands: winningHands)
+        guard !bestKickerHands.isEmpty else { return }
+
+        for (index, bestHand) in bestKickerHands.enumerated() {
+            if index < self.players.count {
+                self.players[index].bestHand = bestHand
+            } else {
+                self.player.bestHand = bestHand
+            }
+
+            for (index, winningHand) in winningHands.enumerated() {
+                if winningHand == bestHand {
+                    self.winningHands[index].tieBreakingKickerCard = bestHand.tieBreakingKickerCard
+                }
+            }
+        }
     }
 }

@@ -8,17 +8,21 @@
 import Foundation
 
 enum Suit: String {
-    case clubs = "♧"
     case diamonds = "♢"
+    case clubs = "♧"
     case hearts = "♡"
     case spades = "♤"
+
+    static func random() -> Suit {
+        allCases.randomElement() ?? .spades
+    }
 }
 
 extension Suit: CaseIterable {}
 extension Suit: Hashable {}
 
 extension Suit: Comparable {
-    static let order: [Suit] = [clubs, diamonds, hearts, spades]
+    static let order: [Suit] = [diamonds, clubs, hearts, spades]
 
     static func == (lhs: Suit, rhs: Suit) -> Bool {
         return lhs.rawValue == rhs.rawValue
