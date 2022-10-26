@@ -102,7 +102,7 @@ struct CardFaceDownView: View {
                     .minimumScaleFactor(0.01)
                     .frame(height: CardView.width * 0.68)
                     .opacity(0.21625)
-                Color.secondary
+                Color.brown.opacity(0.5)
                     .cornerRadius(5)
             }
         }
