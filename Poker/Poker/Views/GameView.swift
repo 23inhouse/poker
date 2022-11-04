@@ -15,15 +15,15 @@ struct GameView: View {
     @State var isBet: Bool = false
 
     var player: Player { game.player }
-    var players: [Player] { game.players }
+    var computerPlayers: [Player] { game.computerPlayers }
     var river: [Card] { game.river }
 
-    var pot: Int { players.map(\.bet).reduce(0, +) + player.bet }
+    var pot: Int { computerPlayers.map(\.bet).reduce(0, +) + player.bet }
 
     var body: some View {
         VStack(spacing: 10) {
             VStack {
-                ForEach(Array(players.enumerated()), id: \.offset) { _, player in
+                ForEach(Array(computerPlayers.enumerated()), id: \.offset) { _, player in
                     PlayerView(player: player, isFaceUp: false)
                 }
             }

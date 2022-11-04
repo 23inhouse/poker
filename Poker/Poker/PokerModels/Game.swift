@@ -18,14 +18,22 @@ class Game: ObservableObject {
         return deck
     }()
 
+    static var numberOfPlayers: Int = 5
+
     var deck: [Card] = Game.deck
 
-    @Published var player: Player = Player()
-    @Published var players: [Player] = [Player(), Player(), Player(), Player()]
+    @Published var players: [Player] = (0..<Game.numberOfPlayers).map { _ in Player() }
     @Published var river: [Card] = []
     @Published var winningHands: [BestHand] = []
     @Published var riverPosition: RiverPosition = .preflop
     @Published var isPoopMode: Bool = false
+
+    var player: Player {
+        get { players.last! }
+        set(newPlayer) { players[players.count - 1] = newPlayer }
+    }
+
+    var computerPlayers: [Player] { Array(players.prefix(Game.numberOfPlayers - 1)) }
 
     var over: Bool { riverPosition == .over }
     var isFolded: Bool { player.isFolded }
@@ -40,10 +48,6 @@ class Game: ObservableObject {
     func new() {
         self.winningHands = []
         self.river = []
-
-        self.player.cards = []
-        self.player.isFolded = false
-        self.player.bestHand = nil
 
         for i in 0..<players.count {
             self.players[i].cards = []
@@ -62,7 +66,6 @@ class Game: ObservableObject {
             self.deck = deck
         }
         self.players = dealPlayers()
-        self.player = dealPlayer()
         self.river = []
         self.riverPosition = .preflop
     }
@@ -77,17 +80,10 @@ class Game: ObservableObject {
         return self.deck.popLast() ?? Card(rank: .ace, suit: .spades)
     }
 
-    func dealPlayer() -> Player {
-        return Player(cards: [dealCard(), dealCard()])
-    }
-
     func dealPlayers() -> [Player] {
-        return [
-            Player(cards: [dealCard(), dealCard()]),
-            Player(cards: [dealCard(), dealCard()]),
-            Player(cards: [dealCard(), dealCard()]),
+        (0..<Game.numberOfPlayers).map { _ in
             Player(cards: [dealCard(), dealCard()])
-        ]
+        }
     }
 
     func dealRiver() {
@@ -148,17 +144,11 @@ class Game: ObservableObject {
 
     func calcBestHands() {
         print("Game.calcBestHand")
-        let players: [Player] = players + [player]
-
         let playerBestHands = Poker.calcBestHands(from: players, river: river)
 
         for (index, playerBestHand) in playerBestHands.enumerated() {
 //            print("index:", index, "bestHand:", playerBestHand, playerBestHand.hand!, playerBestHand.cards)
-            if index < self.players.count {
-                self.players[index].bestHand = playerBestHand
-            } else {
-                self.player.bestHand = playerBestHand
-            }
+            self.players[index].bestHand = playerBestHand
         }
 
         guard riverPosition == .over || isPoopMode else { return }
@@ -168,11 +158,7 @@ class Game: ObservableObject {
         guard !bestKickerHands.isEmpty else { return }
 
         for (index, bestHand) in bestKickerHands.enumerated() {
-            if index < self.players.count {
-                self.players[index].bestHand = bestHand
-            } else {
-                self.player.bestHand = bestHand
-            }
+            self.players[index].bestHand = bestHand
 
             for (index, winningHand) in winningHands.enumerated() {
                 if winningHand == bestHand {
