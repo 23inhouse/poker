@@ -17,26 +17,7 @@ struct PlayerView: View {
     static let cardWidth: CGFloat = UIScreen.main.bounds.size.width * 0.122
     static let numberOfCards: Int = 2
 
-    var cards: [Card] {
-        player.cards
-    }
-
-    var bestHandDescription: String {
-        guard let bestHand = player.bestHand else { return PlayerView.noDescription }
-        return bestHand.description
-    }
-    static var noDescription: String = "No cards"
-
-    var isShowDescription: Bool {
-        isShowHand && player.bestHand != nil
-    }
-
-    var isInBestHand: Bool {
-        guard !player.isFolded else { return false }
-        guard game.over else { return true }
-
-        return isWinningHand
-    }
+    var cards: [Card] { player.cards }
 
     var isShowHand: Bool {
         if game.isPoopMode { return true }
@@ -69,39 +50,7 @@ struct PlayerView: View {
                          }
                      }
             )
-            VStack(alignment: .leading) {
-                HStack {
-                    VStack {
-                        Circle().fill(.secondary)
-                            .frame(maxWidth: PlayerView.cardWidth * 0.4)
-                    }
-                    .frame(maxWidth: 50)
-                    VStack(alignment: .leading) {
-                        HStack {
-                            VStack(alignment: .trailing) {
-                                Text("BET")
-                                Text("\(player.bet)€")
-                            }
-                            .frame(maxWidth: .infinity)
-                            .font(.title3)
-                            VStack(alignment: .trailing) {
-                                Text("CHIPS")
-                                Text("\(player.chips)€")
-                            }
-                            .frame(maxWidth: .infinity)
-                            .font(.title3)
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                    .font(.body)
-                }
-                Text("\(bestHandDescription)")
-                    .opacity(isShowDescription ? 1 : 0)
-                    .animation(!isShowDescription ? .none : .linear(duration: 0.125), value: isShowHand)
-                Spacer()
-
-            }
-            .opacity(isInBestHand ? 1 : 0.25)
+            PlayerDetailView(player: player, isShowHand: isShowHand, isWinningHand: isWinningHand)
         }
         .frame(maxWidth: .infinity)
         .frame(height: PlayerView.cardWidth * 1.8)
@@ -127,6 +76,67 @@ struct PlayerCardView: View {
 
     var body: some View {
         CardView(card: card, isFaceUp: isFaceUp, isInBestHand: isCardInBestHand)
+    }
+}
+
+struct PlayerDetailView: View {
+    @EnvironmentObject var game: Game
+
+    let player: Player
+    var isShowHand: Bool = false
+    var isWinningHand: Bool = false
+
+    var bestHandDescription: String {
+        guard let bestHand = player.bestHand else { return PlayerDetailView.noDescription }
+        return bestHand.description
+    }
+    static var noDescription: String = "No cards"
+
+    var isShowDescription: Bool {
+        isShowHand && player.bestHand != nil
+    }
+
+    var isInBestHand: Bool {
+        guard !player.isFolded else { return false }
+        guard game.over else { return true }
+
+        return isWinningHand
+    }
+
+    var body: some View {
+        VStack(alignment: .leading) {
+            HStack {
+                VStack {
+                    Circle().fill(.secondary)
+                        .frame(maxWidth: PlayerView.cardWidth * 0.4)
+                }
+                .frame(maxWidth: 50)
+                VStack(alignment: .leading) {
+                    HStack {
+                        VStack(alignment: .trailing) {
+                            Text("BET")
+                            Text("\(player.bet)€")
+                        }
+                        .frame(maxWidth: .infinity)
+                        .font(.title3)
+                        VStack(alignment: .trailing) {
+                            Text("CHIPS")
+                            Text("\(player.chips)€")
+                        }
+                        .frame(maxWidth: .infinity)
+                        .font(.title3)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .font(.body)
+            }
+            Text("\(bestHandDescription)")
+                .opacity(isShowDescription ? 1 : 0)
+                .animation(!isShowDescription ? .none : .linear(duration: 0.125), value: isShowHand)
+            Spacer()
+        }
+        .opacity(isInBestHand ? 1 : 0.25)
+
     }
 }
 
