@@ -16,6 +16,7 @@ struct PlayerView: View {
 
     static let cardWidth: CGFloat = UIScreen.main.bounds.size.width * 0.122
     static let numberOfCards: Int = 2
+    static let betDragDistance: Double = 30
 
     var cards: [Card] { player.cards }
 
@@ -40,23 +41,48 @@ struct PlayerView: View {
                 let card: Card? = cards.count > index ? cards[index] : nil
                 PlayerCardView(player: player, card: card, isFaceUp: isShowHand, isWinningHand: isWinningHand)
             }
-            .gesture(
-                DragGesture(minimumDistance: 100)
-                     .onEnded { endedGesture in
-                         guard player == game.player else { return }
-                         if (endedGesture.location.y - endedGesture.startLocation.y) < 0 {
-                             game.player.fold()
-                             isFolded = true
-                         }
-                     }
-            )
+            .gesture(FoldGesture)
             PlayerDetailView(player: player, isShowHand: isShowHand, isWinningHand: isWinningHand)
+                .containerShape(Rectangle())
+                .gesture(BetGesture)
         }
         .frame(maxWidth: .infinity)
         .frame(height: PlayerView.cardWidth * 1.8)
         .onChange(of: player) { newValue in
             isFolded = false
         }
+    }
+
+    var FoldGesture: some Gesture {
+        DragGesture(minimumDistance: 100)
+            .onEnded { endedGesture in
+                guard player == game.player else { return }
+                if (endedGesture.location.y - endedGesture.startLocation.y) < 0 {
+                    game.player.fold()
+                    isFolded = true
+                }
+            }
+    }
+
+    var BetGesture: some Gesture {
+        DragGesture(minimumDistance: PlayerView.betDragDistance)
+            .onChanged { gesture in
+                print(gesture.translation.height * -1)
+                let dragDelta = gesture.translation.height * -1
+                let potAmount: Int = 40
+                let betStep: Int = Int(Double(dragDelta) / PlayerView.betDragDistance)
+                var amountToBet = 0
+                switch betStep {
+                case 0: amountToBet = 0
+                case 1: amountToBet = potAmount / 2
+                case 2: amountToBet = potAmount
+                case 3: amountToBet = potAmount * 2
+                case 4: amountToBet = potAmount * 3
+                case 5: amountToBet = potAmount * 4
+                default: amountToBet = 1000
+                }
+                game.player.setAmountToBet(amountToBet)
+            }
     }
 }
 

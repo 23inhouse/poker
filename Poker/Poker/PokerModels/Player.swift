@@ -24,5 +24,9 @@ struct Player {
     mutating func fold() {
         isFolded = true
     }
+
+    mutating func setAmountToBet(_ amount: Int) {
+        bet = amount
+    }
 }
 extension Player: Hashable {}
