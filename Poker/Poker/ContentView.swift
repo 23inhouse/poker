@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject var game: Game = Game()
+    @StateObject var appState: AppState = AppState()
 
     var body: some View {
         GameView()
-            .padding(10.000)
+            .padding(10)
             .preferredColorScheme(.light)
-            .environmentObject(game)
+            .environmentObject(appState)
     }
 }
 

@@ -7,20 +7,29 @@
 
 import SwiftUI
 
+extension CardView {
+    static let width: CGFloat = UIScreen.main.bounds.size.width * 0.122
+}
+
 struct CardView: View {
+    @EnvironmentObject var appState: AppState
+
     let card: Card?
-    var isFaceUp: Bool
+    let isFaceUp: Bool
+    var isReavelable: Bool = false
     var isInBestHand: Bool = false
 
-    static let width: CGFloat = UIScreen.main.bounds.size.width * 0.122
+    var cardVM: CardViewModel {
+        CardViewModel(card: card, isRevealable: isReavelable, isInBestHand: isInBestHand, isPoopMode: appState.isPoopMode)
+    }
 
     var body: some View {
         ZStack {
-            if let card = card {
-                FlipView(isFlipped: !isFaceUp) {
-                    CardFaceUpView(card: card, isInBestHand: isInBestHand)
+            if card != nil {
+                FlippableView(isFlipped: !isFaceUp) {
+                    CardFaceUpView(cardVM: cardVM)
                 } backView: {
-                    CardFaceDownView(isInBestHand: isInBestHand)
+                    CardFaceDownView(cardVM: cardVM)
                 }
             } else {
                 CardPlaceHolderView()
@@ -29,138 +38,87 @@ struct CardView: View {
     }
 }
 
-struct CardFaceUpView: View {
-    @EnvironmentObject var game: Game
+extension CardView {
+    struct CardFaceUpView: View {
+        @EnvironmentObject var appState: AppState
 
-    let card: Card
-    var isInBestHand: Bool = false
+        let cardVM: CardViewModel
 
-    var color: Color {
-        return [.clubs, .spades].contains(card.suit) ? .black : .red
-    }
-
-    var position: RiverPosition { game.riverPosition }
-
-    var opacity: CGFloat {
-        guard position == .over || game.isPoopMode else { return 1 }
-        return isInBestHand ? 1 : 0.25
-    }
-
-    var offset: CGFloat {
-        guard position == .over || game.isPoopMode else { return 0 }
-        return isInBestHand ? -5 : 5
-    }
-    var body: some View {
-        CardWrapperView(color: color, opacity: opacity, offset: offset) {
-            ZStack {
-                Color.white
-                VStack(spacing: 0) {
-                    HStack {
-                        Image(systemName: "suit.\(card.suit.description).fill")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxHeight: CardView.width * 0.34)
+        var body: some View {
+            CardWrapperView(width: CardView.width, color: cardVM.color, opacity: cardVM.opacity, offset: cardVM.offset) {
+                ZStack {
+                    Color.white
+                    VStack(spacing: 0) {
+                        HStack {
+                            Image(systemName: cardVM.suitImageSystemName)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxHeight: CardView.width * 0.34)
+                            Spacer()
+                        }
                         Spacer()
                     }
-                    Spacer()
+                    VStack {
+                        Spacer()
+                        Text(cardVM.rankDescription)
+                            .fontWeight(.bold)
+                            .font(.system(size: 500))
+                            .minimumScaleFactor(0.01)
+                            .frame(height: CardView.width)
+                            .padding(.bottom, CardView.width * 0.1)
+                    }
                 }
-                VStack {
-                    Spacer()
-                    Text(card.rank.rawValue)
+            }
+        }
+    }
+
+    struct CardFaceDownView: View {
+        @EnvironmentObject var appState: AppState
+
+        let cardVM: CardViewModel
+
+        var color: Color = .secondary
+        var offset: CGFloat = 0
+
+        var body: some View {
+            CardWrapperView(width: CardView.width, color: color, opacity: cardVM.opacity, offset: offset) {
+                ZStack {
+                    Text("💩")
+                        .fontWeight(.bold)
+                        .font(.system(size: 500))
+                        .minimumScaleFactor(0.01)
+                        .frame(height: CardView.width * 0.68)
+                        .opacity(0.21625)
+                    Color.brown.opacity(0.5)
+                        .cornerRadius(5)
+                }
+            }
+        }
+    }
+
+    struct CardPlaceHolderView: View {
+        var color: Color = .secondary
+        var opacity: CGFloat = 0.5
+        var offset: CGFloat = 0
+
+        var body: some View {
+            CardWrapperView(width: CardView.width, color: color, opacity: opacity, offset: offset) {
+                ZStack {
+                    Text("💩")
                         .fontWeight(.bold)
                         .font(.system(size: 500))
                         .minimumScaleFactor(0.01)
                         .frame(height: CardView.width)
-                        .padding(.bottom, CardView.width * 0.1)
+                        .opacity(0.025)
                 }
             }
         }
     }
 }
 
-struct CardFaceDownView: View {
-    @EnvironmentObject var game: Game
-
-    var isInBestHand: Bool = false
-
-    var color: Color = .secondary
-    var position: RiverPosition { game.riverPosition }
-
-    var opacity: CGFloat {
-        guard position == .over else { return 1 }
-        return isInBestHand ? 1 : 0.25
-    }
-
-    var offset: CGFloat = 0
-
-    var body: some View {
-        CardWrapperView(color: color, opacity: opacity, offset: offset) {
-            ZStack {
-                Text("💩")
-                    .fontWeight(.bold)
-                    .font(.system(size: 500))
-                    .minimumScaleFactor(0.01)
-                    .frame(height: CardView.width * 0.68)
-                    .opacity(0.21625)
-                Color.brown.opacity(0.5)
-                    .cornerRadius(5)
-            }
-        }
-    }
-}
-
-struct CardPlaceHolderView: View {
-    var color: Color = .secondary
-    var opacity: CGFloat = 0.5
-    var offset: CGFloat = 0
-
-    var body: some View {
-        CardWrapperView(color: color, opacity: opacity, offset: offset) {
-            ZStack {
-                Text("💩")
-                    .fontWeight(.bold)
-                    .font(.system(size: 500))
-                    .minimumScaleFactor(0.01)
-                    .frame(height: CardView.width)
-                    .opacity(0.025)
-            }
-        }
-    }
-}
-
-struct CardWrapperView<Content: View>: View {
-    var color: Color = .secondary
-    var opacity: CGFloat = 1
-    var offset: CGFloat = 0
-
-    @ViewBuilder var content: () -> Content
-
-    var body: some View {
-        content()
-            .containerShape(Rectangle())
-            .foregroundColor(color)
-            .frame(maxWidth: .infinity)
-            .frame(width: CardView.width)
-            .frame(height: CardView.width * 1.5)
-            .padding(.horizontal, CardView.width * 0.1)
-            .padding(.vertical, CardView.width * 0.1)
-            .background(.white)
-            .cornerRadius(10)
-            .overlay(
-                RoundedRectangle(cornerRadius: 9)
-                    .stroke(color, lineWidth: 1.4)
-                    .padding(1)
-            )
-            .opacity(opacity)
-            .animation(.none, value: opacity)
-            .offset(y: offset)
-            .animation(.default, value: offset)
-
-    }
-}
-
-
 struct CardView_Previews: PreviewProvider {
+    static let appState = AppState()
+
     static var previews: some View {
         VStack {
             HStack {
@@ -169,84 +127,32 @@ struct CardView_Previews: PreviewProvider {
                 CardView(card: nil, isFaceUp: false)
 
             }
+            Divider()
+            Text("isFaceUp = false")
+            HStack {
+                CardView(card: Card(), isFaceUp: false, isReavelable: false, isInBestHand: true)
+                CardView(card: Card(), isFaceUp: false, isReavelable: true, isInBestHand: true)
+                CardView(card: Card(), isFaceUp: false, isReavelable: true, isInBestHand: false)
+
+            }
+            Divider()
+            Text("isFaceUp = .random()")
             HStack {
                 CardView(card: Card(rank: .ten, suit: .diamonds), isFaceUp: true)
                 CardView(card: Card(), isFaceUp: true)
                 CardView(card: Card(), isFaceUp: false)
 
             }
+            Divider()
+            Text("isRevealable = true")
             HStack {
-                CardView(card: Card(), isFaceUp: true)
-                CardView(card: Card(), isFaceUp: false)
-                CardView(card: Card(), isFaceUp: true)
-
-            }
-            HStack {
-                CardView(card: Card(), isFaceUp: false)
-                CardView(card: Card(), isFaceUp: true)
-                CardView(card: Card(), isFaceUp: true)
+                CardView(card: Card(), isFaceUp: false, isReavelable: true, isInBestHand: true)
+                CardView(card: Card(), isFaceUp: true, isReavelable: true, isInBestHand: true)
+                CardView(card: Card(), isFaceUp: true, isReavelable: true, isInBestHand: false)
 
             }
         }
         .padding(10)
-        .environmentObject(Game())
-    }
-}
-
-struct FlipView<FrontView: View, BackView: View>: View {
-    var isFlipped: Bool = false
-
-    @ViewBuilder let frontView: () -> FrontView
-    @ViewBuilder let backView: () -> BackView
-
-    @State private var isShowingAnimation = false
-
-    @State private var backDegree: CGFloat = -89.999
-    @State private var frontDegree: CGFloat = 0
-
-    @State private var isShowingFront: Bool = true
-
-    var frontOpacity: CGFloat { isShowingFront ? 1 : 0 }
-    var backOpacity: CGFloat { !isShowingFront ? 1 : 0 }
-
-    let durationAndDelay: CGFloat = 0.075
-
-    var body: some View {
-        ZStack() {
-            frontView()
-                .opacity(frontOpacity)
-                .rotation3DEffect(Angle(degrees: frontDegree), axis: (x: 0, y: 1, z: 0))
-                .animation(!isShowingAnimation ? .none : .linear(duration: durationAndDelay), value: frontDegree)
-            backView()
-                .opacity(backOpacity)
-                .rotation3DEffect(Angle(degrees: backDegree), axis: (x: 0, y: 1, z: 0))
-                .animation(!isShowingAnimation ? .none : .linear(duration: durationAndDelay), value: backDegree)
-        }
-        .onChange(of: isFlipped) { isFlipped in
-            flip(isFlipped)
-        }
-        .onAppear {
-            guard isFlipped else { return }
-            backDegree = 0
-            frontDegree = 89.999
-            isShowingFront = false
-        }
-    }
-
-    private func flip(_ isFlipped: Bool) {
-        isShowingAnimation = true
-        if !isFlipped {
-            self.backDegree = -89.999
-            DispatchQueue.main.asyncAfter(deadline: .now() + durationAndDelay) {
-                self.frontDegree = 0
-                self.isShowingFront = true
-            }
-        } else {
-            self.frontDegree = 89.999
-            DispatchQueue.main.asyncAfter(deadline: .now() + durationAndDelay) {
-                self.backDegree = 0
-                self.isShowingFront = false
-            }
-        }
+        .environmentObject(appState)
     }
 }

@@ -7,188 +7,132 @@
 
 import SwiftUI
 
+extension PlayerView {
+    static let numberOfCards: Int = 2
+}
+
 struct PlayerView: View {
-    @EnvironmentObject var game: Game
-    @State var isFolded: Bool = false
+    @EnvironmentObject var appState: AppState
 
     let player: Player
     let isFaceUp: Bool
+    var winningHands: [BestHand]
+    var isGameOver: Bool
+    var foldGesture: _EndedGesture<DragGesture> = DragGesture().onEnded({ _ in })
+    var betGesture: _ChangedGesture<DragGesture> = DragGesture().onChanged({ _ in })
 
-    static let cardWidth: CGFloat = UIScreen.main.bounds.size.width * 0.122
-    static let numberOfCards: Int = 2
-    static let betDragDistance: Double = 30
-
-    var cards: [Card] { player.cards }
-
-    var isShowHand: Bool {
-        if game.isPoopMode { return true }
-        if isFaceUp { return true }
-
-        guard !isFolded else { return false }
-        guard game.over else { return isFaceUp }
-
-        return isWinningHand
-    }
-
-    var isWinningHand: Bool {
-        guard let playerBestHand = player.bestHand else { return false }
-        return game.winningHands.contains(playerBestHand)
+    var playerVM: PlayerViewModel {
+        PlayerViewModel(player: player, isFaceUp: isFaceUp, winningHands: winningHands, isGameOver: isGameOver, isPoopMode: appState.isPoopMode)
     }
 
     var body: some View {
         HStack {
             ForEach(Array(0..<PlayerView.numberOfCards), id: \.self) { index in
-                let card: Card? = cards.count > index ? cards[index] : nil
-                PlayerCardView(player: player, card: card, isFaceUp: isShowHand, isWinningHand: isWinningHand)
+                PlayerCardView(playerVM: playerVM, index: index)
+                    .gesture(foldGesture)
             }
-            .gesture(FoldGesture)
-            PlayerDetailView(player: player, isShowHand: isShowHand, isWinningHand: isWinningHand)
+            PlayerDetailView(playerVM: playerVM)
                 .containerShape(Rectangle())
-                .gesture(BetGesture)
+                .gesture(betGesture)
         }
         .frame(maxWidth: .infinity)
-        .frame(height: PlayerView.cardWidth * 1.8)
-        .onChange(of: player) { newValue in
-            isFolded = false
+        .frame(height: CardView.width * 1.8)
+    }
+}
+
+extension PlayerView {
+    struct PlayerCardView: View {
+        @EnvironmentObject var appState: AppState
+
+        let playerVM: PlayerViewModel
+        let index: Int
+
+        var card: Card? { playerVM.card(at: index) }
+        var isFaceUp: Bool { playerVM.isShowHand }
+        var isReavelable: Bool { playerVM.isRevealable }
+        var isInBestHand: Bool { playerVM.isCardInBestHand(at: index) }
+
+        var body: some View {
+            CardView(card: card, isFaceUp: isFaceUp, isReavelable: isReavelable, isInBestHand: isInBestHand )
         }
     }
 
-    var FoldGesture: some Gesture {
-        DragGesture(minimumDistance: 100)
-            .onEnded { endedGesture in
-                guard player == game.player else { return }
-                if (endedGesture.location.y - endedGesture.startLocation.y) < 0 {
-                    game.player.fold()
-                    isFolded = true
-                }
-            }
-    }
+    struct PlayerDetailView: View {
+        let playerVM: PlayerViewModel
 
-    var BetGesture: some Gesture {
-        DragGesture(minimumDistance: PlayerView.betDragDistance)
-            .onChanged { gesture in
-                print(gesture.translation.height * -1)
-                let dragDelta = gesture.translation.height * -1
-                let potAmount: Int = 40
-                let betStep: Int = Int(Double(dragDelta) / PlayerView.betDragDistance)
-                var amountToBet = 0
-                switch betStep {
-                case 0: amountToBet = 0
-                case 1: amountToBet = potAmount / 2
-                case 2: amountToBet = potAmount
-                case 3: amountToBet = potAmount * 2
-                case 4: amountToBet = potAmount * 3
-                case 5: amountToBet = potAmount * 4
-                default: amountToBet = 1000
-                }
-                game.player.setAmountToBet(amountToBet)
-            }
-    }
-}
-
-struct PlayerCardView: View {
-    @EnvironmentObject var game: Game
-
-    let player: Player
-    let card: Card?
-    let isFaceUp: Bool
-    let isWinningHand: Bool
-
-    var isCardInBestHand: Bool {
-        guard isWinningHand else { return false }
-        guard let card = card else { return false }
-        return game.winningCards.contains(card)
-    }
-
-    var body: some View {
-        CardView(card: card, isFaceUp: isFaceUp, isInBestHand: isCardInBestHand)
-    }
-}
-
-struct PlayerDetailView: View {
-    @EnvironmentObject var game: Game
-
-    let player: Player
-    var isShowHand: Bool = false
-    var isWinningHand: Bool = false
-
-    var bestHandDescription: String {
-        guard let bestHand = player.bestHand else { return PlayerDetailView.noDescription }
-        return bestHand.description
-    }
-    static var noDescription: String = "No cards"
-
-    var isShowDescription: Bool {
-        isShowHand && player.bestHand != nil
-    }
-
-    var isInBestHand: Bool {
-        guard !player.isFolded else { return false }
-        guard game.over else { return true }
-
-        return isWinningHand
-    }
-
-    var body: some View {
-        VStack(alignment: .leading) {
-            HStack {
-                VStack {
-                    Circle().fill(.secondary)
-                        .frame(maxWidth: PlayerView.cardWidth * 0.4)
-                }
-                .frame(maxWidth: 50)
-                VStack(alignment: .leading) {
-                    HStack {
-                        VStack(alignment: .trailing) {
-                            Text("BET")
-                            Text("\(player.bet)€")
-                        }
-                        .frame(maxWidth: .infinity)
-                        .font(.title3)
-                        VStack(alignment: .trailing) {
-                            Text("CHIPS")
-                            Text("\(player.chips)€")
-                        }
-                        .frame(maxWidth: .infinity)
-                        .font(.title3)
+        var body: some View {
+            VStack(alignment: .leading) {
+                HStack {
+                    VStack {
+                        Circle().fill(.secondary)
+                            .frame(maxWidth: CardView.width * 0.4)
                     }
+                    .frame(maxWidth: 50)
+                    VStack(alignment: .leading) {
+                        HStack {
+                            VStack(alignment: .trailing) {
+                                Text("BET")
+                                Text(playerVM.playerBetAmount)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .font(.title3)
+                            VStack(alignment: .trailing) {
+                                Text("CHIPS")
+                                Text(playerVM.playerChipsAmount)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .font(.title3)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .font(.body)
                 }
-                .frame(maxWidth: .infinity)
-                .font(.body)
+                Text("\(playerVM.bestHandDescription)")
+                    .opacity(playerVM.isShowDescription ? 1 : 0)
+                    .animation(!playerVM.isShowDescription ? .none : .linear(duration: 0.125), value: playerVM.isShowHand)
+                Spacer()
             }
-            Text("\(bestHandDescription)")
-                .opacity(isShowDescription ? 1 : 0)
-                .animation(!isShowDescription ? .none : .linear(duration: 0.125), value: isShowHand)
-            Spacer()
-        }
-        .opacity(isInBestHand ? 1 : 0.25)
+            .opacity(playerVM.isInBestHand ? 1 : 0.25)
 
+        }
     }
 }
 
 struct PlayerView_Previews: PreviewProvider {
-    static let game = {
-        let game = Game()
-        game.deal()
-        game.riverPosition = .preflop
-        return game
-    }()
-    static let player1 = game.players.first!
-    static let player2 = game.players.last!
+    static let appState = AppState()
+
+    static let players: [Player] = [
+        Player(cards: [Card(), Card()], isFolded: true),
+        Player(cards: [Card(), Card()], isFolded: false)
+    ]
+    static let winningCards = [Card(), Card()]
+    static let winningPlayer = Player(cards: winningCards, bestHand: BestHand(cards: [winningCards.sorted().last!]))
+    static let foldedPlayer = Player(cards: winningCards, bestHand: BestHand(cards: []), isFolded: true)
+    static let playerVM = PlayerView.PlayerViewModel(player: players.last!, isFaceUp: true, winningHands: [], isGameOver: false, isPoopMode: false)
 
     static var previews: some View {
         VStack {
             HStack {
-                PlayerCardView(player: player1, card: nil, isFaceUp: false, isWinningHand: false)
-                PlayerCardView(player: player1, card: Card(), isFaceUp: true, isWinningHand: false)
+                PlayerView.PlayerCardView(playerVM: playerVM, index: 0)
+                PlayerView.PlayerCardView(playerVM: playerVM, index: 1)
+                PlayerView.PlayerCardView(playerVM: playerVM, index: 2)
             }
             Divider()
-            PlayerView(player: player1, isFaceUp: false)
-            ForEach(game.players, id: \.self) { player in
-                PlayerView(player: player, isFaceUp: true)
+            PlayerView(player: players.first!, isFaceUp: false, winningHands: [], isGameOver: false)
+            PlayerView(player: players.last!, isFaceUp: true, winningHands: [], isGameOver: false)
+            Divider()
+            VStack {
+                Text("Winning player")
+                PlayerView(player: winningPlayer, isFaceUp: true, winningHands: [winningPlayer.bestHand!], isGameOver: true)
             }
-            PlayerView(player: player2, isFaceUp: false)
+            Divider()
+            VStack {
+                Text("Folded player")
+                PlayerView(player: foldedPlayer, isFaceUp: true, winningHands: [winningPlayer.bestHand!], isGameOver: true)
+                Divider()
+                PlayerView(player: foldedPlayer, isFaceUp: false, winningHands: [winningPlayer.bestHand!], isGameOver: true)
+            }
         }
-        .environmentObject(Game())
+        .environmentObject(appState)
     }
 }
