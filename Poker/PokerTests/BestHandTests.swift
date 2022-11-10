@@ -73,16 +73,23 @@ final class BestHandTests: XCTestCase {
 
         for hands in bestHands {
             XCTAssertGreaterThan(hands.high, hands.low, hands.desc)
+            // NOTE: really really make sure
+            XCTAssertEqual([hands.low, hands.high].sorted().last!, hands.high, hands.desc)
+            XCTAssertEqual([hands.high, hands.low].sorted().last!, hands.high, hands.desc)
         }
     }
 
     func testSortingOnTheRiver() throws {
         let bestHands: [(high: BestHand, low: BestHand, desc: String)] = [
             (BestHand.from("K♡ K♢ A♧ 7♢ 6♢ 5♢ J♢")!, BestHand.from("A♧ 8♢ A♧ 7♢ 6♢ 5♢ J♢")!, "Straight Flush beats lower"),
+            (BestHand.from("K♡ 8♡ J♢ J♤ 10♢ 9♧ K♧")!, BestHand.from("10♧ 4♡ J♢ J♤ 10♢ 9♧ K♧")!, "Two Pair beats lower"),
         ]
 
         for hands in bestHands {
             XCTAssertGreaterThan(hands.high, hands.low, hands.desc)
+            // NOTE: really really make sure
+            XCTAssertEqual([hands.low, hands.high].sorted().last!, hands.high, hands.desc)
+            XCTAssertEqual([hands.high, hands.low].sorted().last!, hands.high, hands.desc)
         }
     }
 

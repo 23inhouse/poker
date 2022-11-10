@@ -153,9 +153,8 @@ extension BestHand: Comparable {
         guard numberOfCards > 0 else { return false }
 
         for index in 0..<numberOfCards {
-            if lhsHand[index].rank < rhsHand[index].rank {
-                return true
-            }
+            if lhsHand[index].rank < rhsHand[index].rank { return true }
+            if lhsHand[index].rank > rhsHand[index].rank { return false }
         }
 
         let lhsKickers = lhs.kickerCards()
