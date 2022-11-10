@@ -10,10 +10,10 @@ import Foundation
 @MainActor
 struct Dealer {
     var gameVM: GameView.GameViewModel
+    var isPoopMode: Bool = false
 
     var players: [Player] { gameVM.players }
     var riverPosition: RiverPosition { gameVM.riverPosition }
-    var isPoopMode: Bool = false
 
     func start() {
         print("Came.start")
@@ -32,38 +32,6 @@ struct Dealer {
         }
 
         gameVM.riverPosition = .preflop
-    }
-
-    func deal() {
-        shuffle()
-        dealPlayers()
-        gameVM.river = []
-        gameVM.riverPosition = .preflop
-    }
-
-    func shuffle() {
-        gameVM.deck = Deck.cards.shuffled().shuffled().shuffled()
-    }
-
-    func dealCard() -> Card {
-        _ = gameVM.deck.popLast()
-        return gameVM.deck.popLast() ?? Card(rank: .ace, suit: .spades)
-    }
-
-    func dealPlayers() {
-        for i in 0..<players.count {
-            gameVM.players[i].cards = [dealCard(), dealCard()]
-            gameVM.players[i].isFolded = false
-            gameVM.players[i].bestHand = nil
-        }
-    }
-
-    func dealRiver() {
-        if riverPosition == .preflop {
-            gameVM.river = [dealCard(), dealCard(), dealCard()]
-        } else if [.flop, .turn].contains(riverPosition) {
-            gameVM.river.append(dealCard())
-        }
     }
 
     func next() {
@@ -114,10 +82,6 @@ struct Dealer {
         }
     }
 
-    func setPosition(_ position: RiverPosition) {
-        gameVM.riverPosition = position
-    }
-
     func calcBestHands() {
         print("Game.calcBestHand")
         let playerBestHands = Poker.calcBestHands(from: players, river: gameVM.river)
@@ -142,5 +106,43 @@ struct Dealer {
                 }
             }
         }
+    }
+}
+
+private extension Dealer {
+    func deal() {
+        shuffle()
+        dealPlayers()
+        gameVM.river = []
+        gameVM.riverPosition = .preflop
+    }
+
+    func shuffle() {
+        gameVM.deck = Deck.cards.shuffled().shuffled().shuffled()
+    }
+
+    func dealPlayers() {
+        for i in 0..<players.count {
+            gameVM.players[i].cards = [dealCard(), dealCard()]
+            gameVM.players[i].isFolded = false
+            gameVM.players[i].bestHand = nil
+        }
+    }
+
+    func dealRiver() {
+        if riverPosition == .preflop {
+            gameVM.river = [dealCard(), dealCard(), dealCard()]
+        } else if [.flop, .turn].contains(riverPosition) {
+            gameVM.river.append(dealCard())
+        }
+    }
+
+    func dealCard() -> Card {
+        _ = gameVM.deck.popLast()
+        return gameVM.deck.popLast() ?? Card(rank: .ace, suit: .spades)
+    }
+
+    func setPosition(_ position: RiverPosition) {
+        gameVM.riverPosition = position
     }
 }

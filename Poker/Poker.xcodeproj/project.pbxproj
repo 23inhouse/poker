@@ -37,6 +37,7 @@
 		B529E5F6291BF9C800714097 /* CardView+ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B529E5F5291BF9C800714097 /* CardView+ViewModel.swift */; };
 		B529E5F8291BFA1A00714097 /* GameView+ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B529E5F7291BFA1A00714097 /* GameView+ViewModel.swift */; };
 		B529E5FA291BFA5700714097 /* RiverView+ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B529E5F9291BFA5700714097 /* RiverView+ViewModel.swift */; };
+		B529E5FC291D202A00714097 /* DealerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B529E5FB291D202A00714097 /* DealerTests.swift */; };
 		B5397FA829081AC100AE724A /* BestHandTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5397FA729081AC100AE724A /* BestHandTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -91,6 +92,7 @@
 		B529E5F5291BF9C800714097 /* CardView+ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CardView+ViewModel.swift"; sourceTree = "<group>"; };
 		B529E5F7291BFA1A00714097 /* GameView+ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameView+ViewModel.swift"; sourceTree = "<group>"; };
 		B529E5F9291BFA5700714097 /* RiverView+ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RiverView+ViewModel.swift"; sourceTree = "<group>"; };
+		B529E5FB291D202A00714097 /* DealerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DealerTests.swift; sourceTree = "<group>"; };
 		B5397FA729081AC100AE724A /* BestHandTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BestHandTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -166,6 +168,7 @@
 			children = (
 				B5397FA729081AC100AE724A /* BestHandTests.swift */,
 				B513FFC32909507400D6C472 /* CardTests.swift */,
+				B529E5FB291D202A00714097 /* DealerTests.swift */,
 				B513FFC5290955D900D6C472 /* HandTests.swift */,
 				B51AFB0728FF3CD800754F3C /* PokerTests.swift */,
 			);
@@ -377,6 +380,7 @@
 			files = (
 				B513FFC6290955D900D6C472 /* HandTests.swift in Sources */,
 				B513FFC42909507400D6C472 /* CardTests.swift in Sources */,
+				B529E5FC291D202A00714097 /* DealerTests.swift in Sources */,
 				B5397FA829081AC100AE724A /* BestHandTests.swift in Sources */,
 				B51AFB0828FF3CD800754F3C /* PokerTests.swift in Sources */,
 			);

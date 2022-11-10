@@ -32,4 +32,21 @@ final class PokerTests: XCTestCase {
             XCTAssertEqual(kickerHand!.description, hands.label, hands.desc)
         }
     }
+
+    func testCalcWinningHandsOnRiver() {
+        let bestHands: [(h1: BestHand, h2: BestHand, winners: [BestHand], label: String, desc: String)] = [
+            (BestHand.from("10♧ 4♡ J♢ J♤ 10♢ 9♧ K♧")!, BestHand.from("K♡ 8♡ J♢ J♤ 10♢ 9♧ K♧")!, [BestHand.from("K♡ 8♡ J♢ J♤ 10♢ 9♧ K♧")!], "Two Pair of Ks & Ks", "Two Pair beats lower"),
+        ]
+
+        for hands in bestHands {
+            let playerOne = Player(cards: hands.h1.cards)
+            let playerTwo = Player(cards: hands.h2.cards)
+            let players = [playerOne, playerTwo]
+            let bestHands = Poker.calcBestHands(from: players)
+            XCTAssertEqual(bestHands, [hands.h1, hands.h2], hands.desc)
+
+            let winningHands = Poker.calcWinningHands(from: [hands.h1, hands.h2])
+            XCTAssertEqual(winningHands, hands.winners, hands.desc)
+        }
+    }
 }

@@ -9,8 +9,13 @@ import Foundation
 
 struct Poker {
     static func calcBestHands(from players: [Player], river: [Card] = []) -> [BestHand] {
-        let lowestBestHand = BestHand(cards: [Card(rank: .two, suit: .diamonds)])
-        return players.map { player in player.bestHand(from: river) ?? lowestBestHand }
+        players.map { player in calcBestHand(for: player, river: river) }
+    }
+
+    static func calcBestHand(for player: Player, river: [Card] = []) -> BestHand {
+        guard !player.isFolded else { return BestHand.lowest }
+        let hand = Hand(cards: player.cards + river)
+        return BestHand.check([hand]) ?? BestHand.lowest
     }
 
     static func calcWinningHands(from bestHands: [BestHand]) -> [BestHand] {

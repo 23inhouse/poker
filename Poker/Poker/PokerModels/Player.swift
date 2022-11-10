@@ -14,14 +14,6 @@ struct Player {
     var bestHand: BestHand?
     var isFolded: Bool = false
 
-    func bestHand(from river: [Card]) -> BestHand? {
-        guard !isFolded else { return nil }
-        let allCards = cards + river
-        guard !allCards.isEmpty else { return nil }
-        let handFromAllCards = Hand(cards: allCards)
-        return BestHand.check([handFromAllCards])
-    }
-
     mutating func fold() {
         isFolded = true
     }

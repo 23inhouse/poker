@@ -7,6 +7,10 @@
 
 import Foundation
 
+extension BestHand {
+    static var lowest: BestHand { BestHand(cards: [Card(rank: .two, suit: .diamonds)]) }
+}
+
 struct BestHand {
     typealias HandLogic = ([Card]) -> (hand: Hand, label: String)?
 
