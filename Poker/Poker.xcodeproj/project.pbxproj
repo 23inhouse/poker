@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B50FB63129227F8B00DD9940 /* DispatchTime+String.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50FB63029227F8B00DD9940 /* DispatchTime+String.swift */; };
+		B50FB6332922807800DD9940 /* Dealer+Calculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50FB6322922807800DD9940 /* Dealer+Calculator.swift */; };
+		B50FB6352922977F00DD9940 /* Dealer+Utility.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50FB6342922977F00DD9940 /* Dealer+Utility.swift */; };
 		B513FFC229094ACC00D6C472 /* BestHand.swift in Sources */ = {isa = PBXBuildFile; fileRef = B513FFC129094ACC00D6C472 /* BestHand.swift */; };
 		B513FFC42909507400D6C472 /* CardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B513FFC32909507400D6C472 /* CardTests.swift */; };
 		B513FFC6290955D900D6C472 /* HandTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B513FFC5290955D900D6C472 /* HandTests.swift */; };
@@ -61,6 +64,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B50FB63029227F8B00DD9940 /* DispatchTime+String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DispatchTime+String.swift"; sourceTree = "<group>"; };
+		B50FB6322922807800DD9940 /* Dealer+Calculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Dealer+Calculator.swift"; sourceTree = "<group>"; };
+		B50FB6342922977F00DD9940 /* Dealer+Utility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Dealer+Utility.swift"; sourceTree = "<group>"; };
 		B513FFC129094ACC00D6C472 /* BestHand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BestHand.swift; sourceTree = "<group>"; };
 		B513FFC32909507400D6C472 /* CardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardTests.swift; sourceTree = "<group>"; };
 		B513FFC5290955D900D6C472 /* HandTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandTests.swift; sourceTree = "<group>"; };
@@ -125,6 +131,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B50FB62D2922789E00DD9940 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				B50FB63029227F8B00DD9940 /* DispatchTime+String.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
 		B51AFAEA28FF3CD300754F3C = {
 			isa = PBXGroup;
 			children = (
@@ -153,6 +167,7 @@
 				B529E5EA291BC32E00714097 /* AppState.swift */,
 				B529E5FD291E66F100714097 /* Models */,
 				B51AFB282900102300754F3C /* Views */,
+				B50FB62D2922789E00DD9940 /* Extensions */,
 				B51AFAFA28FF3CD700754F3C /* Assets.xcassets */,
 				B51AFAFC28FF3CD700754F3C /* Preview Content */,
 			);
@@ -221,6 +236,8 @@
 			isa = PBXGroup;
 			children = (
 				B529E5E6291A8FD500714097 /* Dealer.swift */,
+				B50FB6322922807800DD9940 /* Dealer+Calculator.swift */,
+				B50FB6342922977F00DD9940 /* Dealer+Utility.swift */,
 				B51AFB29290014AE00754F3C /* Poker */,
 				B529E5FE291E670200714097 /* Utility.swift */,
 			);
@@ -396,11 +413,14 @@
 				B51AFB2F290018CD00754F3C /* Rank.swift in Sources */,
 				B529E5FA291BFA5700714097 /* RiverView+ViewModel.swift in Sources */,
 				B529E5EF291BD40100714097 /* FlippableView.swift in Sources */,
+				B50FB6352922977F00DD9940 /* Dealer+Utility.swift in Sources */,
 				B529E5EB291BC32E00714097 /* AppState.swift in Sources */,
 				B51AFB2728FF828F00754F3C /* GameView.swift in Sources */,
+				B50FB63129227F8B00DD9940 /* DispatchTime+String.swift in Sources */,
 				B529E5FF291E670200714097 /* Utility.swift in Sources */,
 				B529E5E9291BC19100714097 /* Deck.swift in Sources */,
 				B51AFB3329001B1900754F3C /* Poker.swift in Sources */,
+				B50FB6332922807800DD9940 /* Dealer+Calculator.swift in Sources */,
 				B51AFB2328FF7CBA00754F3C /* PlayerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -11,138 +11,137 @@ struct GameView: View {
     @EnvironmentObject var appState: AppState
     @StateObject var gameVM: GameViewModel = GameViewModel()
 
-//    @State var isFolded: Bool = false
-    @State var isChecked: Bool = false
     @State var isBet: Bool = false
+    @State var isEven: Bool = .random()
 
     var dealer: Dealer { Dealer(gameVM: gameVM, isPoopMode: appState.isPoopMode) }
     var player: Player { gameVM.player }
     var computerPlayers: [Player] { gameVM.computerPlayers }
 
-    var pot: Int { computerPlayers.map(\.bet).reduce(0, +) + player.bet }
+    var spacerPadding: CGFloat { 50 }
 
     var body: some View {
         VStack(spacing: 10) {
             VStack {
                 ForEach(Array(computerPlayers.enumerated()), id: \.offset) { _, player in
-                    PlayerView(player: player, isFaceUp: false, winningHands: gameVM.winningHands, isGameOver: gameVM.over)
+                    PlayerView(player: player, winningHands: gameVM.winningHands, isFaceUp: false, isGameOver: gameVM.over)
                 }
             }
-            HStack {
-                controlsView
-                Spacer()
-                potView
-                Spacer()
-                controlsView
-            }
-            .font(.largeTitle)
-            .font(.title)
-            RiverView(cards: gameVM.river, position: gameVM.riverPosition, winningCards: gameVM.winningCards)
-            ThePlayerView(player: player, gameVM: gameVM)
             Spacer()
-        }
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                dealer.start()
+            VStack {
+                potView
+                RiverView(cards: gameVM.river, position: gameVM.riverPosition, winningCards: gameVM.winningCards)
             }
+            .containerShape(Rectangle())
+            .onTapGesture {
+                guard gameVM.over else { return }
+                Task.init { await next() }
+            }
+            Spacer()
+            playerBetView
+            PlayerView(player: player, winningHands: gameVM.winningHands, isFaceUp: true, isGameOver: gameVM.over, betGesture: betGesture, checkGesture: checkGesture, foldGesture: foldGesture)
+        }
+        .task {
+            await dealer.start()
         }
         .onChange(of: appState.isPoopMode) { newValue in
-            guard newValue else { return }
             dealer.calcBestHands()
         }
     }
-
-    var potView: some View {
-        VStack {
-            Text("Pot: \(pot)€")
-            HStack {
-                if gameVM.player.isFolded {
-                    Text("FOLD")
-                } else {
-                    if isChecked {
-                        Text("CHECK")
-                    }
-                    Text("Bet: \(player.bet)€")
-                    if isBet {
-                        Text("Raise: \(player.bet)€")
-                    }
-                }
-            }
-            .font(.title)
-        }
-    }
-
-    var controlsView: some View {
-        VStack {
-            Text("🌈")
-                .font(.largeTitle)
-                .padding(10)
-                .containerShape(Rectangle())
-                .onTapGesture {
-                    play()
-                }
-            Spacer()
-            Text("💩")
-                .padding(10)
-                .containerShape(Rectangle())
-                .font(.largeTitle)
-                .onTapGesture {
-                    appState.isPoopMode.toggle()
-                }
-        }
-    }
-
-    func play() {
-        print("GameView.play: ", gameVM.riverPosition)
-        dealer.next()
-    }
 }
 
-extension GameView {
-    struct ThePlayerView: View {
-        let player: Player
-        let gameVM: GameViewModel
+private extension GameView {
+    var potView: some View {
+        Text("Pot: \(gameVM.potIncludingCurrentBettingRound)€")
+            .foregroundColor(gameVM.over ? .blue : .primary)
+            .font(.largeTitle)
+    }
 
-        var body: some View {
-            PlayerView(player: player, isFaceUp: true, winningHands: gameVM.winningHands, isGameOver: gameVM.over, foldGesture: foldGesture, betGesture: betGesture)
+    var playerBetView: some View {
+        HStack {
+            if gameVM.player.isFolded {
+                Text("FOLD")
+            } else {
+                Text("Bet: \(player.bet)€")
+            }
         }
+        .font(.title)
+    }
 
-        var foldGesture: _EndedGesture<DragGesture> {
-            DragGesture(minimumDistance: 100)
-                .onEnded { endedGesture in
+    func next() async {
+        print("\nGameView.next current position:", gameVM.riverPosition)
+        await dealer.perform()
+    }
+
+    var betGesture: _EndedGesture<_ChangedGesture<DragGesture>> {
+            let betDragDistance: Double = 30
+
+            return DragGesture(minimumDistance: betDragDistance)
+                .onChanged { gesture in
+                    guard dealer.isThePlayersTurn else { return }
+
+                    let dragDelta = gesture.translation.height * -1
+                    let potAmount: Int = 40
+                    let betStep: Int = Int(Double(dragDelta) / betDragDistance)
+                    var newAmountToBet = 0
+                    switch betStep {
+                    case 0: newAmountToBet = 0
+                    case 1: newAmountToBet = potAmount / 2
+                    case 2: newAmountToBet = potAmount
+                    case 3: newAmountToBet = potAmount * 2
+                    case 4: newAmountToBet = potAmount * 3
+                    case 5: newAmountToBet = potAmount * 4
+                    default: newAmountToBet = dealer.allInAmount
+                    }
+
+                    guard player.bet != newAmountToBet else { return }
                     DispatchQueue.main.async {
-                        guard player == gameVM.player else { return }
-                        if (endedGesture.location.y - endedGesture.startLocation.y) < 0 {
-                            gameVM.player.fold()
+                        print("GameView.betGesture.Betting:", newAmountToBet)
+                        gameVM.player.bet = newAmountToBet
+                    }
+                }
+                .onEnded { gesture in
+                    guard dealer.isThePlayersTurn else { return }
+
+                    DispatchQueue.main.async {
+                        print("\nGameView.betGesture.Ended")
+                        Task.init {
+                            await dealer.betPlayer(amount: gameVM.player.bet)
+                            await dealer.perform()
                         }
                     }
                 }
         }
 
-        var betGesture: _ChangedGesture<DragGesture> {
-            let betDragDistance: Double = 30
+        var checkGesture: () -> Void {
+            return {
+                guard dealer.isThePlayersTurn else { return }
 
-            return DragGesture(minimumDistance: betDragDistance)
-                .onChanged { gesture in
-                    print(gesture.translation.height * -1)
-                    let dragDelta = gesture.translation.height * -1
-                    let potAmount: Int = 40
-                    let betStep: Int = Int(Double(dragDelta) / betDragDistance)
-                    var amountToBet = 0
-                    switch betStep {
-                    case 0: amountToBet = 0
-                    case 1: amountToBet = potAmount / 2
-                    case 2: amountToBet = potAmount
-                    case 3: amountToBet = potAmount * 2
-                    case 4: amountToBet = potAmount * 3
-                    case 5: amountToBet = potAmount * 4
-                    default: amountToBet = 1000
+                DispatchQueue.main.async {
+                    print("\nGameView.checkGesture")
+                    Task.init {
+                        await dealer.checkPlayer()
+                        await dealer.bettingRound()
                     }
-                    DispatchQueue.main.async {
-                        gameVM.player.setAmountToBet(amountToBet)
+                 }
+            }
+        }
+
+    var foldGesture: _EndedGesture<DragGesture> {
+        DragGesture(minimumDistance: 100)
+            .onEnded { endedGesture in
+                DispatchQueue.main.async {
+                    guard dealer.isThePlayersTurn else { return }
+
+                    print("\nGameView.foldGesture")
+                    if (endedGesture.location.y - endedGesture.startLocation.y) < 0 {
+                        Task.init {
+                            await dealer.foldPlayer()
+                            await dealer.bettingRound()
+                        }
                     }
                 }
-        }
+            }
     }
 }
 

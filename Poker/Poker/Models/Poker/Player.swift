@@ -10,16 +10,18 @@ import Foundation
 struct Player {
     var cards: [Card] = []
     var bet: Int = 0
-    var chips: Int = 500
+    var chips: Int = 10
     var bestHand: BestHand?
     var isFolded: Bool = false
+    var isOnTheButton: Bool = false
+    var isBigBlind: Bool = false
+    var isSmallBlind: Bool = false
+    var isCurrentPlayer: Bool = false
+    var isThePlayer: Bool = false
 
-    mutating func fold() {
-        isFolded = true
-    }
+    var availableChips: Int { chips - bet }
 
-    mutating func setAmountToBet(_ amount: Int) {
-        bet = amount
-    }
+    var isCanBet: Bool { availableChips > 0 }
+    var isInHand: Bool { !isFolded && isCanBet }
 }
 extension Player: Hashable {}

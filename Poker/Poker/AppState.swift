@@ -9,5 +9,4 @@ import Foundation
 
 class AppState: ObservableObject {
     @Published var isPoopMode: Bool = false
-
 }

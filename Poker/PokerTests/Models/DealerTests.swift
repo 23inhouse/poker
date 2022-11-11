@@ -13,7 +13,6 @@ final class DealerTests: XCTestCase {
     func testCalcBestHand() throws {
         let gameVM = GameView.GameViewModel()
         let dealer = Dealer(gameVM: gameVM, isPoopMode: true)
-        dealer.new()
 
         let bestHands: [(h1: BestHand, h2: BestHand, river: Hand?, winners: [BestHand], kicker: Card?, label: String, desc: String)] = [
             (BestHand.from("A♡")!, BestHand.from("K♤")!, nil, [BestHand.from("A♡")!], nil, "A high", "High card beats lower"),
