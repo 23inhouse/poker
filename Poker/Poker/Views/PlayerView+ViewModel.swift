@@ -70,6 +70,7 @@ extension PlayerView {
         }
 
         func isCardInBestHand(at index: Int) -> Bool {
+            guard !isFolded else { return false }
             guard isWinningHand else { return false }
             guard let card = card(at: index) else { return false }
             return winningHands.flatMap(\.handWithKicker).contains(card)
@@ -173,5 +174,6 @@ struct PlayerViewPlayerViewModel_Previews: PreviewProvider {
             }
         }
         .environmentObject(appState)
+        .previewLayout(PreviewLayout.sizeThatFits)
     }
 }

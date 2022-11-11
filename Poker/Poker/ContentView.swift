@@ -21,5 +21,6 @@ struct ContentView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+            .previewDevice(PreviewDevice.init(rawValue: "iPhone SE (3rd generation)"))
     }
 }

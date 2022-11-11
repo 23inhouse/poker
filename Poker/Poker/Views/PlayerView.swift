@@ -133,6 +133,26 @@ struct PlayerView_Previews: PreviewProvider {
                 PlayerView(player: foldedPlayer, isFaceUp: false, winningHands: [winningPlayer.bestHand!], isGameOver: true)
             }
         }
+        .previewLayout(PreviewLayout.sizeThatFits)
+        .previewDevice(PreviewDevice.init(rawValue: "iPhone SE (3rd generation)"))
         .environmentObject(appState)
+    }
+}
+
+struct PlayerCardView_Previews: PreviewProvider {
+    static let appState = AppState()
+
+    static let player: Player = Player(cards: [Card(), Card()], isFolded: false, isOnTheButton: true)
+    static let playerVM = PlayerView.PlayerViewModel(player: player, winningHands: [], isFaceUp: true)
+
+    static var previews: some View {
+        HStack {
+            PlayerView.PlayerCardView(playerVM: playerVM, index: 0)
+            PlayerView.PlayerCardView(playerVM: playerVM, index: 1)
+            PlayerView.PlayerCardView(playerVM: playerVM, index: 2)
+        }
+        .environmentObject(appState)
+        .previewDevice(PreviewDevice.init(rawValue: "iPhone SE (3rd generation)"))
+        .previewLayout(PreviewLayout.sizeThatFits)
     }
 }

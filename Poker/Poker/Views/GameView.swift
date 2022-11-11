@@ -7,10 +7,6 @@
 
 import SwiftUI
 
-extension GameView {
-    static var numberOfPlayers: Int = 5
-}
-
 struct GameView: View {
     @EnvironmentObject var appState: AppState
     @StateObject var gameVM: GameViewModel = GameViewModel()
@@ -156,5 +152,6 @@ struct GameView_Previews: PreviewProvider {
     static var previews: some View {
         GameView()
             .environmentObject(appState)
+            .previewDevice(PreviewDevice.init(rawValue: "iPhone SE (3rd generation)"))
     }
 }

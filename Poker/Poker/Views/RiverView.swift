@@ -73,5 +73,6 @@ struct RiverView_Previews: PreviewProvider {
             Divider()
         }
         .environmentObject(appState)
+        .previewDevice(PreviewDevice.init(rawValue: "iPhone SE (3rd generation)"))
     }
 }

@@ -10,7 +10,7 @@ import XCTest
 
 @MainActor
 final class DealerTests: XCTestCase {
-    func testCalcBestHand() {
+    func testCalcBestHand() throws {
         let gameVM = GameView.GameViewModel()
         let dealer = Dealer(gameVM: gameVM, isPoopMode: true)
         dealer.new()

@@ -83,5 +83,6 @@ struct FlippableView_Previews: PreviewProvider {
             Divider()
             FlippableView(isFlipped: true, frontView: { frontView }, backView: { backView } )
         }
+        .previewDevice(PreviewDevice.init(rawValue: "iPhone SE (3rd generation)"))
     }
 }

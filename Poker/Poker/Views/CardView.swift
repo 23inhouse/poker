@@ -154,5 +154,6 @@ struct CardView_Previews: PreviewProvider {
         }
         .padding(10)
         .environmentObject(appState)
+        .previewDevice(PreviewDevice.init(rawValue: "iPhone SE (3rd generation)"))
     }
 }
