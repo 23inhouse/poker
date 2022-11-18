@@ -34,6 +34,11 @@ struct Hand {
                 }
             }
         }
+
+        guard !(cards.count > 3 && cards[0].rank == cards[3].rank) else {
+            return Array(cards.prefix(4))
+        }
+
         if Set(cards.map(\.rank)).count > 2 {
             cards = Hand(cards: Array(cards.prefix(Hand.maxNumberOfCards))).groupedByRank()
         }

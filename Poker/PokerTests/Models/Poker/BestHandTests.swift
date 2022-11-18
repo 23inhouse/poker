@@ -118,6 +118,7 @@ final class BestHandTests: XCTestCase {
     func testDescriptionFromRiver() throws {
         let expectations: [(hand: Hand, description: String)] = [
             (Hand.from("K♡ K♢ A♧ 7♢ 6♢ 5♢ J♢")!, "Flush K high"),
+            (Hand.from("10♢ K♢ A♤ K♡ A♧ A♡ A♢")!, "Four of a kind As"),
         ]
 
         for expectation in expectations {
