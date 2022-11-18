@@ -17,6 +17,7 @@ final class UtilityTests: XCTestCase {
             (3, 4, 2),
             (3, 5, 3),
             (3, 10, 3),
+            (0, -1, 4),
         ]
 
         for expectation in expectations {
