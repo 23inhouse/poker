@@ -31,6 +31,8 @@ struct Dealer {
     private var calculator: Dealer.Calculator { Calculator(gameVM: gameVM) }
 
     var allInAmount: Int { calculator.allInAmount }
+    var startingAmount: Int { calculator.startingAmount }
+    var minimumBet: Int { calculator.minimumBet }
 
     func start() async {
         print("Dealer.start")
@@ -60,14 +62,19 @@ struct Dealer {
         await bettingRound(new: true)
     }
 
-    func bettingRound(new: Bool = false) async {
+    func bettingRound(new newRound: Bool = false) async {
         guard let currentPlayerIndex = currentPlayerIndex else {
             print("Dealer.bettingRound BETTING ROUND IS COMPLETE")
             await perform()
             return
         }
+
+        if newRound {
+            gameVM.setAllInAmount()
+        }
+
         print("")
-        print("Dealer.bettingRound \(new ? "STARTED" : "CONTINUED") [", currentPlayerIndex, "]")
+        print("Dealer.bettingRound \(newRound ? "STARTED" : "CONTINUED") [", currentPlayerIndex, "]")
 
         guard !(isThePlayersTurn && !gameVM.player.isFolded) else { return }
 
@@ -142,6 +149,10 @@ struct Dealer {
         print("Dealer player:", index, "folds")
 
         await moveToNextPlayer()
+    }
+
+    func betAmount(for betStep: Int) -> Int {
+        calculator.betAmount(for: betStep)
     }
 }
 
@@ -222,6 +233,8 @@ private extension Dealer {
 // MARK: Board
 
 private extension Dealer {
+    var playersTurn: Bool { !players.filter(\.isInHand).isEmpty }
+
     func setPosition(_ position: RiverPosition) {
         gameVM.riverPosition = position
     }
@@ -258,6 +271,7 @@ private extension Dealer {
     }
 
     func moveCurrentPlayerToSmallBlind() async {
+        guard playersTurn else { return }
         print("")
         print("Dealer.moveCurrentPlayerToSmallBlind")
         gameVM.currentPlayerIndex = gameVM.smallBlindIndex

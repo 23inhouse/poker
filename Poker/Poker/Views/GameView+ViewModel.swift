@@ -23,6 +23,7 @@ extension GameView {
         @Published var currentPlayerIndex: Int?
         @Published var buttonIndex: Int = 0
         @Published var pot: Int = 0
+        @Published var allInAmount: Int = 0
 
         var player: Player {
             get { players.last! }
@@ -31,21 +32,29 @@ extension GameView {
 
         var computerPlayers: [Player] { Array(players.prefix(GameViewModel.numberOfPlayers - 1)) }
 
-        var potIncludingCurrentBettingRound: Int { players.map(\.bet).reduce(pot, +) }
-
         var dealer: Dealer { Dealer(gameVM: self) }
 
-        var smallBlindIndex: Int {
-            return dealer.nextAvailableIndex(after: buttonIndex, \.isInHand)
-        }
-
-        var bigBlindIndex: Int {
-            return dealer.nextAvailableIndex(after: smallBlindIndex, \.isInHand)
-        }
+        var smallBlindIndex: Int { dealer.nextAvailableIndex(after: buttonIndex, \.isInHand) }
+        var bigBlindIndex: Int { dealer.nextAvailableIndex(after: smallBlindIndex, \.isInHand) }
 
         var over: Bool { riverPosition == .over }
         var isFolded: Bool { player.isFolded }
         var winningCards: [Card] { winningHands.flatMap(\.handWithKicker) }
+
+        var playerActionDescription: String {
+            if player.isFolded {
+                return "FOLDED"
+            } else if player.bet == player.chips {
+                return "All in"
+            } else if player.bet > dealer.minimumBet {
+                return "Raise: \(player.bet)€"
+            } else if dealer.minimumBet > 0 {
+                return "Call: \(dealer.minimumBet)€"
+            } else {
+                return "Check"
+            }
+
+        }
 
         func isOnTheButton(at index: Int) -> Bool {
             return index == buttonIndex
@@ -61,6 +70,10 @@ extension GameView {
 
         func isCurrentPlayer(at index: Int) -> Bool {
             return index == currentPlayerIndex
+        }
+
+        func setAllInAmount() {
+            allInAmount = dealer.allInAmount
         }
     }
 }
