@@ -16,7 +16,7 @@ extension Dealer {
     static var startingButtonIndex: Int = 3
 
     static let cardTurnDelay: Double = 0.125
-    static let nextPlayerDelay: Double = 0.25
+    static let nextPlayerDelay: Double = 0.15
     static let nextCommunityCardDelay: Double = 0.5
     static let playerIsFoldedSleepDelay: Double = 0.1
 }
@@ -289,7 +289,7 @@ private extension Dealer {
 
         let newIndex = nextAvailableIndex(after: index, \.isCanBet)
         DispatchQueue.main.async { dealPlayer(at: index) }
-        await sleep(Dealer.nextPlayerDelay)
+        await sleep(Dealer.cardTurnDelay * 2)
         guard newIndex != gameVM.smallBlindIndex else { return }
         await dealPlayers(at: newIndex)
     }
