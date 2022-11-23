@@ -21,7 +21,7 @@ struct GameView: View {
         VStack(spacing: 10) {
             VStack {
                 ForEach(Array(computerPlayers.enumerated()), id: \.offset) { _, player in
-                    PlayerView(player: player, winningHands: gameVM.winningHands, isFaceUp: false, isGameOver: gameVM.over)
+                    PlayerView(player: player, winningHands: gameVM.winningHands, isFaceUp: false, isHandFinished: gameVM.isHandFinished)
                 }
             }
             Spacer()
@@ -31,12 +31,12 @@ struct GameView: View {
             }
             .containerShape(Rectangle())
             .onTapGesture {
-                guard gameVM.over else { return }
+                guard gameVM.isHandFinished else { return }
                 Task.init { await next() }
             }
             playerBetView
             Spacer()
-            PlayerView(player: player, winningHands: gameVM.winningHands, isFaceUp: true, isGameOver: gameVM.over, betGesture: betGesture, checkGesture: checkGesture, foldGesture: foldGesture)
+            PlayerView(player: player, winningHands: gameVM.winningHands, isFaceUp: true, isHandFinished: gameVM.isHandFinished, betGesture: betGesture, checkGesture: checkGesture, foldGesture: foldGesture)
         }
         .task {
             await dealer.start()
@@ -50,7 +50,7 @@ struct GameView: View {
 private extension GameView {
     var potView: some View {
         Text("Pot: \(gameVM.pot)€")
-            .foregroundColor(gameVM.over ? .blue : .primary)
+            .foregroundColor(gameVM.isHandFinished ? .blue : .primary)
             .font(.largeTitle)
     }
 

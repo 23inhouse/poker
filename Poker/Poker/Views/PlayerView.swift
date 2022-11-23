@@ -17,13 +17,13 @@ struct PlayerView: View {
     let player: Player
     let winningHands: [BestHand]
     var isFaceUp: Bool = false
-    var isGameOver: Bool = false
+    var isHandFinished: Bool = false
     var betGesture: _EndedGesture<_ChangedGesture<DragGesture>> = DragGesture().onChanged({ _ in }).onEnded({ _ in })
     var checkGesture: () -> Void = {}
     var foldGesture: _EndedGesture<DragGesture> = DragGesture().onEnded({ _ in })
 
     var playerVM: PlayerViewModel {
-        PlayerViewModel(player: player, winningHands: winningHands, isFaceUp: isFaceUp, isGameOver: isGameOver, isPoopMode: appState.isPoopMode)
+        PlayerViewModel(player: player, winningHands: winningHands, isFaceUp: isFaceUp, isHandFinished: isHandFinished, isPoopMode: appState.isPoopMode)
     }
 
     var body: some View {
@@ -90,7 +90,6 @@ extension PlayerView {
                             VStack(alignment: .trailing) {
                                 Text("BET")
                                 Text(playerVM.playerBetAmount)
-//                                    .animation(.fade(), value: playerVM.playerBetAmount)
                             }
                             .frame(maxWidth: .infinity)
                             .font(.title3)
@@ -137,7 +136,7 @@ struct PlayerView_Previews: PreviewProvider {
                 Text("isTheCurrentPlayer: \(String(describing: isCurrentPlayer))").font(.headline)
                 ForEach(isFaceUpOptions, id: \.self) { isFaceUp in
                     let winningPlayer = Player(cards: winningCards, bestHand: winningBestHand, isFolded: false, isSmallBlind: true, isCurrentPlayer: isCurrentPlayer, isThePlayer: true)
-                    PlayerView(player: winningPlayer, winningHands: [winningPlayer.bestHand!], isFaceUp: isFaceUp, isGameOver: false)
+                    PlayerView(player: winningPlayer, winningHands: [winningPlayer.bestHand!], isFaceUp: isFaceUp, isHandFinished: false)
                     Divider()
                 }
             }
@@ -145,7 +144,7 @@ struct PlayerView_Previews: PreviewProvider {
                 Text("isFolded: \(String(describing: isFolded))").font(.headline)
                 ForEach(isFaceUpOptions, id: \.self) { isFaceUp in
                     let winningPlayer = Player(cards: winningCards, bestHand: winningBestHand, isFolded: isFolded, isSmallBlind: true, isCurrentPlayer: false, isThePlayer: true)
-                    PlayerView(player: winningPlayer, winningHands: [winningPlayer.bestHand!], isFaceUp: isFaceUp, isGameOver: false)
+                    PlayerView(player: winningPlayer, winningHands: [winningPlayer.bestHand!], isFaceUp: isFaceUp, isHandFinished: false)
                     Divider()
 
                 }
@@ -157,13 +156,13 @@ struct PlayerView_Previews: PreviewProvider {
                     let winningPlayer = Player(cards: winningCards, bestHand: winningBestHand, isFolded: false, isSmallBlind: true, isCurrentPlayer: false, isThePlayer: isThePlayer)
                     let losingPlayer = Player(cards: winningCards, bestHand: losingBestHand, isFolded: false, isSmallBlind: true, isCurrentPlayer: false, isThePlayer: isThePlayer)
                     Text("Winner")
-                    PlayerView(player: winningPlayer, winningHands: [winningPlayer.bestHand!], isFaceUp: true, isGameOver: true)
+                    PlayerView(player: winningPlayer, winningHands: [winningPlayer.bestHand!], isFaceUp: true, isHandFinished: true)
                     Divider()
                     Text("Loser")
-                    PlayerView(player: losingPlayer, winningHands: [winningPlayer.bestHand!], isFaceUp: true, isGameOver: true)
+                    PlayerView(player: losingPlayer, winningHands: [winningPlayer.bestHand!], isFaceUp: true, isHandFinished: true)
                     Divider()
                     Text("Face Down")
-                    PlayerView(player: losingPlayer, winningHands: [winningPlayer.bestHand!], isFaceUp: false, isGameOver: true)
+                    PlayerView(player: losingPlayer, winningHands: [winningPlayer.bestHand!], isFaceUp: false, isHandFinished: true)
                 }
                 Divider()
             }

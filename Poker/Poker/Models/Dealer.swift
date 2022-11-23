@@ -33,6 +33,7 @@ struct Dealer {
     var allInAmount: Int { calculator.allInAmount }
     var startingAmount: Int { calculator.startingAmount }
     var minimumBet: Int { calculator.minimumBet }
+    var isGameOver: Bool { players.filter(\.isCanBet).count < 2 }
 
     func start() async {
         print("Dealer.start")
@@ -54,7 +55,7 @@ struct Dealer {
         print("")
         print("Dealer.perform [", riverPosition, "]")
 
-        guard !(gameVM.over || isBettingRoundComplete) else {
+        guard !(gameVM.isHandFinished || isBettingRoundComplete) else {
             await performRiverPositionAction()
             return
         }
@@ -109,7 +110,7 @@ struct Dealer {
             gameVM.players[index].bestHand = playerBestHand
         }
 
-        guard riverPosition == .over || isPoopMode else { return }
+        guard riverPosition == .handFinished || isPoopMode else { return }
         print("Dealer.calcBestHands ALL HANDS")
 
         gameVM.winningHands = Poker.calcWinningHands(from: playerBestHands)
@@ -200,14 +201,18 @@ private extension Dealer {
             await finishRoundAndPerformNext()
         case .river:
             // NOTE: No delay on the river because there's no card to turn over
-            setPosition(.over)
+            setPosition(.handFinished)
             await collectBetChips()
             gameVM.currentPlayerIndex = nil
             updateCurrentPlayerStatus()
             calcBestHands()
-        case .over:
-            print("Dealer OVER")
+        case .handFinished:
+            print("Dealer hand finished")
             payWinners()
+            guard !isGameOver else {
+                gameVM.isGameOver = true
+                return
+            }
             collectCards()
             moveButton()
             await newHand()

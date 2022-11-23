@@ -67,8 +67,8 @@ struct RiverView_Previews: PreviewProvider {
             RiverView(cards: cards, position: .river)
             Divider()
             VStack {
-                Text("Gave over reveal")
-                RiverView(cards: cards, position: .over, winningCards: Array(cards.shuffled().prefix(3)))
+                Text("Hand finished reveal")
+                RiverView(cards: cards, position: .handFinished, winningCards: Array(cards.shuffled().prefix(3)))
             }
             Divider()
         }

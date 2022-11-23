@@ -8,5 +8,5 @@
 import Foundation
 
 enum RiverPosition {
-    case preflop, flop, turn, river, over
+    case preflop, flop, turn, river, handFinished
 }

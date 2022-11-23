@@ -37,7 +37,7 @@ extension GameView {
         var smallBlindIndex: Int { dealer.nextAvailableIndex(after: buttonIndex, \.isInHand) }
         var bigBlindIndex: Int { dealer.nextAvailableIndex(after: smallBlindIndex, \.isInHand) }
 
-        var over: Bool { riverPosition == .over }
+        var isHandFinished: Bool { riverPosition == .handFinished }
         var isFolded: Bool { player.isFolded }
         var winningCards: [Card] { winningHands.flatMap(\.handWithKicker) }
 
@@ -53,7 +53,6 @@ extension GameView {
             } else {
                 return "Check"
             }
-
         }
 
         func isOnTheButton(at index: Int) -> Bool {

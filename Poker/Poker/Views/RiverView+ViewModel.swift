@@ -39,11 +39,11 @@ extension RiverView {
                 return index < 4
             case .river:
                 return true
-            case .over:
+            case .handFinished:
                 return true
             }
         }
 
-        var isReavelable: Bool { position == .over }
+        var isReavelable: Bool { position == .handFinished }
     }
 }

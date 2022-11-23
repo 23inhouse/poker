@@ -12,7 +12,7 @@ extension PlayerView {
         let player: Player
         let winningHands: [BestHand]
         var isFaceUp: Bool = false
-        var isGameOver: Bool = false
+        var isHandFinished: Bool = false
         var isPoopMode: Bool = false
 
         var cards: [Card] { player.cards }
@@ -33,7 +33,7 @@ extension PlayerView {
             if isFaceUp { return true }
 
             guard !isFolded else { return false }
-            guard isGameOver else { return isFaceUp }
+            guard isHandFinished else { return isFaceUp }
 
             return isWinningHand
         }
@@ -56,12 +56,12 @@ extension PlayerView {
         var isInBestHand: Bool {
             guard isCanBet else { return false }
             guard !isFolded else { return false }
-            guard isGameOver else { return true }
+            guard isHandFinished else { return true }
 
             return isWinningHand
         }
 
-        var isRevealable: Bool { isPoopMode || isGameOver || isFolded }
+        var isRevealable: Bool { isPoopMode || isHandFinished || isFolded }
 
         var playerColor: Color { isThePlayer ? .blue : .green }
         var color: Color? { isCurrentPlayer ? playerColor : nil }
@@ -91,8 +91,8 @@ struct PlayerViewPlayerViewModel_Previews: PreviewProvider {
     static let faceDownPlayerVM = PlayerView.PlayerViewModel(player: winningPlayer, winningHands: winningHands)
     static let winningPlayerVM = PlayerView.PlayerViewModel(player: winningPlayer, winningHands: winningHands, isFaceUp: true)
     static let foldedPlayerVM = PlayerView.PlayerViewModel(player: foldedPlayer, winningHands: winningHands, isFaceUp: true)
-    static let winningGameOverPlayerVM = PlayerView.PlayerViewModel(player: winningPlayer, winningHands: winningHands, isFaceUp: true, isGameOver: true)
-    static let foldedGameOverPlayerVM = PlayerView.PlayerViewModel(player: foldedPlayer, winningHands: winningHands, isFaceUp: true, isGameOver: true)
+    static let winningGameOverPlayerVM = PlayerView.PlayerViewModel(player: winningPlayer, winningHands: winningHands, isFaceUp: true, isHandFinished: true)
+    static let foldedGameOverPlayerVM = PlayerView.PlayerViewModel(player: foldedPlayer, winningHands: winningHands, isFaceUp: true, isHandFinished: true)
     static let winningPoopModePlayerVM = PlayerView.PlayerViewModel(player: winningPlayer, winningHands: winningHands, isFaceUp: true, isPoopMode: true)
     static let foldedPoopModePlayerVM = PlayerView.PlayerViewModel(player: foldedPlayer, winningHands: winningHands, isFaceUp: true, isPoopMode: true)
 
