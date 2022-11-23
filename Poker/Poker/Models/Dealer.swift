@@ -105,6 +105,7 @@ struct Dealer {
 
         for (index, playerBestHand) in playerBestHands.enumerated() {
 //            print("index:", index, "bestHand:", playerBestHand, playerBestHand.hand!, playerBestHand.cards)
+            guard players[index].isInHand else { continue }
             gameVM.players[index].bestHand = playerBestHand
         }
 
