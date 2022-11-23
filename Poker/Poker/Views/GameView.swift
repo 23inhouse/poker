@@ -31,7 +31,6 @@ struct GameView: View {
             }
             .containerShape(Rectangle())
             .onTapGesture {
-                guard gameVM.isHandFinished else { return }
                 Task.init { await next() }
             }
             playerBetView
@@ -49,7 +48,7 @@ struct GameView: View {
 
 private extension GameView {
     var potView: some View {
-        Text("Pot: \(gameVM.pot)€")
+        Text(gameVM.potDescription)
             .foregroundColor(gameVM.isHandFinished ? .blue : .primary)
             .font(.largeTitle)
     }
@@ -60,6 +59,7 @@ private extension GameView {
     }
 
     func next() async {
+        guard gameVM.isHandFinished else { return }
         print("\nGameView.next current position:", gameVM.riverPosition)
         await dealer.perform()
     }

@@ -24,6 +24,7 @@ extension GameView {
         @Published var buttonIndex: Int = 0
         @Published var pot: Int = 0
         @Published var allInAmount: Int = 0
+        @Published var isGameOver: Bool = false
 
         var player: Player {
             get { players.last! }
@@ -40,6 +41,12 @@ extension GameView {
         var isHandFinished: Bool { riverPosition == .handFinished }
         var isFolded: Bool { player.isFolded }
         var winningCards: [Card] { winningHands.flatMap(\.handWithKicker) }
+
+        var potDescription: String {
+            guard !isGameOver else { return player.chips > 0 ? "Winner!" :"Game Over" }
+
+            return "Pot: \(pot)€"
+        }
 
         var playerActionDescription: String {
             if player.isFolded {

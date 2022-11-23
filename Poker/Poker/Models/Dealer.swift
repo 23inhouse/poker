@@ -33,11 +33,11 @@ struct Dealer {
     var allInAmount: Int { calculator.allInAmount }
     var startingAmount: Int { calculator.startingAmount }
     var minimumBet: Int { calculator.minimumBet }
-    var isGameOver: Bool { players.filter(\.isCanBet).count < 2 }
 
     func start() async {
         print("Dealer.start")
 
+        gameVM.isGameOver = false
         gameVM.buttonIndex = Dealer.startingButtonIndex
 
         gameVM.players = [
@@ -52,6 +52,12 @@ struct Dealer {
     }
 
     func perform() async {
+        guard !gameVM.isGameOver else {
+            collectCards()
+            await start()
+            return
+        }
+
         print("")
         print("Dealer.perform [", riverPosition, "]")
 
@@ -165,6 +171,7 @@ private extension Dealer {
     var riverPosition: RiverPosition { gameVM.riverPosition }
     var currentPlayerIndex: Int? { gameVM.currentPlayerIndex }
     var thePlayerIndex: Int { gameVM.players.count - 1 }
+    var isGameOver: Bool { gameVM.isHandFinished && players.filter(\.isCanBet).count < 2 }
     var isBettingRoundComplete: Bool {
         let largestBet = calculator.largestBet
         let smallestBet = calculator.smallestBet
@@ -209,10 +216,7 @@ private extension Dealer {
         case .handFinished:
             print("Dealer hand finished")
             payWinners()
-            guard !isGameOver else {
-                gameVM.isGameOver = true
-                return
-            }
+            guard !isGameOver else { return }
             collectCards()
             moveButton()
             await newHand()
@@ -377,6 +381,8 @@ private extension Dealer {
         }
 
         gameVM.pot += betChips
+
+        if isGameOver { gameOver() }
     }
 
     func collectFromLosers() {
@@ -408,6 +414,11 @@ private extension Dealer {
         gameVM.winningHands = []
     }
 
+    func gameOver() {
+        calcBestHands()
+        payWinners()
+        gameVM.isGameOver = true
+    }
 }
 
 // MARK: Utility
