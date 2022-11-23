@@ -23,5 +23,6 @@ struct Player {
 
     var isCanBet: Bool { availableChips > 0 }
     var isInHand: Bool { !isFolded && chips > 0 }
+    var isAllIn: Bool { isInHand && !isCanBet }
 }
 extension Player: Hashable {}

@@ -26,7 +26,7 @@ struct Dealer {
     var gameVM: GameView.GameViewModel
     var isPoopMode: Bool = false
 
-    var isThePlayersTurn: Bool { gameVM.isCurrentPlayer(at: thePlayerIndex) }
+    var isThePlayersTurn: Bool { !isAPlayerAllIn && gameVM.isCurrentPlayer(at: thePlayerIndex) }
 
     private var calculator: Dealer.Calculator { Calculator(gameVM: gameVM) }
 
@@ -66,12 +66,25 @@ struct Dealer {
             return
         }
 
+        guard !isAPlayerAllIn else {
+            print("Dealer.perform PLAYER ALL IN")
+            gameVM.isAPlayerAllIn = true
+            await performRiverPositionAction()
+            return
+        }
+
+
         await bettingRound(new: true)
     }
 
     func bettingRound(new newRound: Bool = false) async {
         guard let currentPlayerIndex = currentPlayerIndex else {
             print("Dealer.bettingRound BETTING ROUND IS COMPLETE")
+
+            if isAPlayerAllIn {
+                gameVM.isAPlayerAllIn = true
+            }
+
             await perform()
             return
         }
@@ -185,9 +198,13 @@ private extension Dealer {
             return currentPlayerIndex == nil && allBetSame
         }
     }
+    var isAPlayerAllIn: Bool { isOnTheButton && ( gameVM.isAPlayerAllIn || isAnyPlayerAllIn ) }
+    var isOnTheButton: Bool { currentPlayerIndex == gameVM.buttonIndex }
+    var isAnyPlayerAllIn: Bool { !players.filter(\.isAllIn).isEmpty }
 
     func newHand() async {
         print("Dealer.newHand")
+        gameVM.isAPlayerAllIn = false
         await dealNewHand()
         await moveCurrentPlayerToSmallBlind()
         await perform()
@@ -282,6 +299,8 @@ private extension Dealer {
 
     func moveCurrentPlayerToSmallBlind() async {
         guard playersTurn else { return }
+        guard !isAPlayerAllIn else { return }
+
         print("")
         print("Dealer.moveCurrentPlayerToSmallBlind")
         gameVM.currentPlayerIndex = gameVM.smallBlindIndex

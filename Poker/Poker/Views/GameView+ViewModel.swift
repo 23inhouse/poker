@@ -25,6 +25,7 @@ extension GameView {
         @Published var pot: Int = 0
         @Published var allInAmount: Int = 0
         @Published var isGameOver: Bool = false
+        @Published var isAPlayerAllIn: Bool = false
 
         var player: Player {
             get { players.last! }

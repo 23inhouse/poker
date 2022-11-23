@@ -83,7 +83,6 @@ private extension GameView {
                 }
             }
             .onEnded { gesture in
-                guard dealer.isThePlayersTurn else { return }
                 guard player.bet > dealer.startingAmount else { return }
 
                 DispatchQueue.main.async {
